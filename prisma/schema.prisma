@@ -16,6 +16,8 @@ model User {
   email     String   @unique
   name      String
   avatarUrl String?
+  role      String   @default("APPLICANT")
+  password  String   @default("")
   createdAt DateTime @default(now())
 
   // Relations
@@ -33,6 +35,8 @@ model Group {
   meetingFrequency String
   minMembers       Int
   maxMembers       Int
+  isPrivate        Boolean       @default(false)
+  profanityFilter  Boolean       @default(false)
   createdAt        DateTime      @default(now())
   
   // Leader

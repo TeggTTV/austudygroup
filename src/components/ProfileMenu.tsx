@@ -10,18 +10,14 @@ import {
 	FiLogOut,
 	FiSun,
 	FiMoon,
+	FiUser,
 } from 'react-icons/fi';
 import { useAppContext } from './AppContext';
+import Image from 'next/image';
 
 export default function ProfileMenu() {
-	const {
-		currentUser,
-		switchUser,
-		requests,
-		groups,
-		theme,
-		toggleTheme,
-	} = useAppContext();
+	const { currentUser, logoutUser, requests, groups, theme, toggleTheme } =
+		useAppContext();
 
 	const [profileOpen, setProfileOpen] = useState(false);
 	const profileRef = useRef<HTMLDivElement>(null);
@@ -50,7 +46,7 @@ export default function ProfileMenu() {
 	}, []);
 
 	const logout = () => {
-		switchUser('GUEST');
+		logoutUser();
 		setProfileOpen(false);
 	};
 
@@ -67,17 +63,16 @@ export default function ProfileMenu() {
 			>
 				{currentUser?.avatarUrl ? (
 					<div className="w-8 h-8 rounded-full overflow-hidden border border-border ring-2 ring-primary/20">
-						<img
+						<Image
 							src={currentUser.avatarUrl}
 							alt="Profile"
 							className="w-full h-full object-cover"
+							width={64}
+							height={64}
 						/>
 					</div>
 				) : (
-					<FaUserCircle
-						size={30}
-						className="text-primary"
-					/>
+					<FaUserCircle size={30} className="text-primary" />
 				)}
 				{/* Pending dot */}
 				{pendingCount > 0 && (
@@ -102,10 +97,7 @@ export default function ProfileMenu() {
 								{/* Greeting */}
 								<div className="px-4 py-3 border-b border-border bg-surface-secondary/50">
 									<p className="text-sm font-semibold text-text-primary">
-										Hi,{' '}
-										{currentUser?.name ||
-											'User'}
-										!
+										Hi, {currentUser?.name || 'User'}!
 									</p>
 									<p className="text-xs text-text-muted mt-0.5">
 										{currentUser?.email}
@@ -133,12 +125,20 @@ export default function ProfileMenu() {
 
 									<div className="h-px bg-border my-1" />
 
+									{/* Edit Profile Link */}
+									<Link
+										href="/profile"
+										onClick={() => setProfileOpen(false)}
+										className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-tertiary transition-colors"
+									>
+										<FiUser size={15} />
+										Edit Profile
+									</Link>
+
 									{/* Groups Link */}
 									<Link
 										href="/groups"
-										onClick={() =>
-											setProfileOpen(false)
-										}
+										onClick={() => setProfileOpen(false)}
 										className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-tertiary transition-colors"
 									>
 										<FiUsers size={15} />
@@ -146,29 +146,21 @@ export default function ProfileMenu() {
 									</Link>
 
 									{/* Pending Requests (Leader only) */}
-									{currentUser?.role ===
-										'LEADER' && (
+									{currentUser?.role === 'LEADER' && (
 										<Link
 											href="/pending"
 											onClick={() =>
-												setProfileOpen(
-													false,
-												)
+												setProfileOpen(false)
 											}
 											className="flex items-center justify-between gap-3 px-3 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-tertiary transition-colors"
 										>
 											<span className="flex items-center gap-3">
-												<FiInbox
-													size={15}
-												/>
+												<FiInbox size={15} />
 												Pending
 											</span>
-											{pendingCount >
-												0 && (
+											{pendingCount > 0 && (
 												<span className="inline-flex items-center justify-center min-w-5 h-5 rounded-full bg-danger text-white text-[10px] font-bold px-1.5">
-													{
-														pendingCount
-													}
+													{pendingCount}
 												</span>
 											)}
 										</Link>
@@ -192,15 +184,13 @@ export default function ProfileMenu() {
 									Welcome!
 								</div>
 								<div className="p-1.5">
-									<button
-										onClick={() => {
-											switchUser('APPLICANT');
-											setProfileOpen(false);
-										}}
+									<Link
+										href="/auth/login"
+										onClick={() => setProfileOpen(false)}
 										className="flex w-full items-center gap-3 px-3 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-tertiary transition-colors"
 									>
 										Sign In
-									</button>
+									</Link>
 								</div>
 							</>
 						)}

@@ -28,6 +28,8 @@ export interface Group {
 	maxMembers: number;
 	leaderId: string;
 	memberIds: string[];
+	isPrivate?: boolean;
+	profanityFilter?: boolean;
 }
 
 export interface JoinRequest {
@@ -59,7 +61,18 @@ interface AppContextType {
 	theme: Theme;
 	hydrated: boolean;
 	toggleTheme: () => void;
-	switchUser: (role: 'LEADER' | 'APPLICANT' | 'GUEST') => void;
+	loginUser: (
+		email: string,
+		password: string,
+	) => Promise<{ success: boolean; error?: string }>;
+	registerUser: (
+		email: string,
+		name: string,
+		password: string,
+		role: 'LEADER' | 'APPLICANT',
+		avatarUrl?: string,
+	) => Promise<{ success: boolean; error?: string }>;
+	logoutUser: () => void;
 	sendJoinRequest: (groupId: string) => void;
 	approveRequest: (requestId: string) => void;
 	declineRequest: (requestId: string) => void;
@@ -70,28 +83,32 @@ interface AppContextType {
 		fileUrl?: string,
 	) => void;
 	updateProfile: (name: string, avatarUrl: string) => void;
+	fetchFeedMessages: (groupId: string) => Promise<void>;
+	createGroup: (
+		name: string,
+		description: string,
+		subject: string,
+		meetingFrequency: string,
+		minMembers: number,
+		maxMembers: number,
+	) => Promise<{ success: boolean; error?: string }>;
+	deleteMessage: (messageId: string) => Promise<void>;
+	updateGroupSettings: (
+		groupId: string,
+		settings: {
+			name?: string;
+			description?: string;
+			meetingFrequency?: string;
+			isPrivate?: boolean;
+			profanityFilter?: boolean;
+			kickUserId?: string;
+			deleteLinkId?: string;
+			deleteFileId?: string;
+		},
+	) => Promise<{ success: boolean; error?: string }>;
 }
 
 /* ──────────────────────────── Seed Data ──────────────────────── */
-
-const MOCK_USERS: User[] = [
-	{
-		id: 'user_leader',
-		email: 'leader@austudygroup.edu.au',
-		name: 'Sarah Connor',
-		avatarUrl:
-			'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-		role: 'LEADER',
-	},
-	{
-		id: 'user_applicant',
-		email: 'applicant@austudygroup.edu.au',
-		name: 'Alex Mercer',
-		avatarUrl:
-			'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-		role: 'APPLICANT',
-	},
-];
 
 const MOCK_GROUPS: Group[] = [
 	{
@@ -164,14 +181,63 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const [groups, setGroups] = useState<Group[]>([]);
 	const [requests, setRequests] = useState<JoinRequest[]>([]);
+	const [users, setUsers] = useState<User[]>([]);
 	const [feedMessages, setFeedMessages] = useState<FeedMessage[]>([]);
 	const [theme, setTheme] = useState<Theme>('light');
 	const [hydrated, setHydrated] = useState(false);
 
-	/* ─── Hydrate from localStorage ─── */
+	/* ─── Hydrate from API / localStorage Fallback ─── */
 	useEffect(() => {
+		async function loadData() {
+			try {
+				// Fetch Groups
+				const gRes = await fetch('/api/groups');
+				const gData = await gRes.json();
+				if (gData.groups && !gData.offline) {
+					setGroups(gData.groups);
+				} else {
+					const savedGroups = localStorage.getItem('asg_groups');
+					setGroups(
+						savedGroups ? JSON.parse(savedGroups) : MOCK_GROUPS,
+					);
+				}
+
+				// Fetch Requests
+				const rRes = await fetch('/api/requests');
+				const rData = await rRes.json();
+				if (rData.requests && !rData.offline) {
+					setRequests(rData.requests);
+				} else {
+					const savedRequests = localStorage.getItem('asg_requests');
+					setRequests(savedRequests ? JSON.parse(savedRequests) : []);
+				}
+
+				// Fetch Users
+				const uRes = await fetch('/api/users');
+				const uData = await uRes.json();
+				if (uData.users && !uData.offline) {
+					setUsers(uData.users);
+				} else {
+					const savedUsers = localStorage.getItem('asg_users');
+					setUsers(savedUsers ? JSON.parse(savedUsers) : []);
+				}
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (e) {
+				console.warn(
+					'API requests failed. Reverting to LocalStorage cache.',
+				);
+				const savedGroups = localStorage.getItem('asg_groups');
+				setGroups(savedGroups ? JSON.parse(savedGroups) : MOCK_GROUPS);
+				const savedRequests = localStorage.getItem('asg_requests');
+				setRequests(savedRequests ? JSON.parse(savedRequests) : []);
+				const savedUsers = localStorage.getItem('asg_users');
+				setUsers(savedUsers ? JSON.parse(savedUsers) : []);
+			}
+		}
+
 		const savedTheme = localStorage.getItem('asg_theme') as Theme | null;
 		const resolvedTheme = savedTheme || 'light';
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setTheme(resolvedTheme);
 		document.documentElement.classList.toggle(
 			'dark',
@@ -179,58 +245,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 		);
 
 		const savedUser = localStorage.getItem('asg_current_user');
-		const savedGroups = localStorage.getItem('asg_groups');
-		const savedRequests = localStorage.getItem('asg_requests');
-		const savedFeed = localStorage.getItem('asg_feed');
-
 		if (savedUser && savedUser !== 'null') {
 			setCurrentUser(JSON.parse(savedUser));
 		} else {
-			setCurrentUser(MOCK_USERS[1]); // Default Applicant
-			localStorage.setItem(
-				'asg_current_user',
-				JSON.stringify(MOCK_USERS[1]),
-			);
+			setCurrentUser(null);
 		}
 
-		if (savedGroups) {
-			setGroups(JSON.parse(savedGroups));
-		} else {
-			setGroups(MOCK_GROUPS);
-			localStorage.setItem('asg_groups', JSON.stringify(MOCK_GROUPS));
-		}
-
-		if (savedRequests) {
-			setRequests(JSON.parse(savedRequests));
-		} else {
-			const initial: JoinRequest = {
-				id: 'req_init',
-				groupId: 'group_1',
-				userId: 'user_applicant',
-				status: 'PENDING',
-				createdAt: new Date().toISOString(),
-			};
-			setRequests([initial]);
-			localStorage.setItem('asg_requests', JSON.stringify([initial]));
-		}
-
-		if (savedFeed) {
-			setFeedMessages(JSON.parse(savedFeed));
-		} else {
-			const seed: FeedMessage[] = [
-				{
-					id: 'feed_1',
-					groupId: 'group_1',
-					userId: 'user_leader',
-					content:
-						'Welcome to the Quantum Mechanics group! Next week we will review Section 4.2 of the textbook.',
-					createdAt: new Date(Date.now() - 86400000).toISOString(),
-				},
-			];
-			setFeedMessages(seed);
-			localStorage.setItem('asg_feed', JSON.stringify(seed));
-		}
-
+		loadData();
 		setHydrated(true);
 	}, []);
 
@@ -244,21 +265,82 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 		});
 	}, []);
 
-	/* ─── Role Switcher ─── */
-	const switchUser = useCallback(
-		(role: 'LEADER' | 'APPLICANT' | 'GUEST') => {
-			let newUser: User | null = null;
-			if (role === 'LEADER') newUser = MOCK_USERS[0];
-			if (role === 'APPLICANT') newUser = MOCK_USERS[1];
-			setCurrentUser(newUser);
-			localStorage.setItem('asg_current_user', JSON.stringify(newUser));
+	/* ─── Authentication Handlers ─── */
+	const loginUser = useCallback(async (email: string, password: string) => {
+		try {
+			const res = await fetch('/api/auth/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email, password }),
+			});
+			const data = await res.json();
+			if (data.success && data.user) {
+				setCurrentUser(data.user);
+				localStorage.setItem(
+					'asg_current_user',
+					JSON.stringify(data.user),
+				);
+				return { success: true };
+			}
+			return {
+				success: false,
+				error: data.error || 'Invalid credentials',
+			};
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (e: unknown) {
+			return { success: false, error: 'Network error occurred' };
+		}
+	}, []);
+
+	const registerUser = useCallback(
+		async (
+			email: string,
+			name: string,
+			password: string,
+			role: 'LEADER' | 'APPLICANT',
+			avatarUrl?: string,
+		) => {
+			try {
+				const res = await fetch('/api/auth/register', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						email,
+						name,
+						password,
+						role,
+						avatarUrl,
+					}),
+				});
+				const data = await res.json();
+				if (data.success && data.user) {
+					setCurrentUser(data.user);
+					localStorage.setItem(
+						'asg_current_user',
+						JSON.stringify(data.user),
+					);
+					return { success: true };
+				}
+				return {
+					success: false,
+					error: data.error || 'Registration failed',
+				};
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (e: unknown) {
+				return { success: false, error: 'Network error occurred' };
+			}
 		},
 		[],
 	);
 
+	const logoutUser = useCallback(() => {
+		setCurrentUser(null);
+		localStorage.removeItem('asg_current_user');
+	}, []);
+
 	/* ─── Join Requests ─── */
 	const sendJoinRequest = useCallback(
-		(groupId: string) => {
+		async (groupId: string) => {
 			if (!currentUser) return;
 			const exists = requests.find(
 				(r) => r.groupId === groupId && r.userId === currentUser.id,
@@ -272,60 +354,107 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 				status: 'PENDING',
 				createdAt: new Date().toISOString(),
 			};
+
+			// Update frontend state immediately
 			const updated = [...requests, nr];
 			setRequests(updated);
 			localStorage.setItem('asg_requests', JSON.stringify(updated));
+
+			try {
+				const res = await fetch('/api/requests', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						action: 'create',
+						groupId,
+						userId: currentUser.id,
+					}),
+				});
+				const data = await res.json();
+				if (data.request && !data.offline) {
+					// Replace state item with true DB representation
+					setRequests((prev) =>
+						prev.map((r) =>
+							r.groupId === groupId && r.userId === currentUser.id
+								? data.request
+								: r,
+						),
+					);
+				}
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (e) {
+				console.warn('Could not save join request to remote DB.');
+			}
 		},
 		[currentUser, requests],
 	);
 
 	const approveRequest = useCallback(
-		(requestId: string) => {
+		async (requestId: string) => {
 			const req = requests.find((r) => r.id === requestId);
 			if (!req) return;
 
+			// Update state immediately
 			const updReqs = requests.map((r) =>
-				r.id === requestId
-					? { ...r, status: 'APPROVED' as const }
-					: r,
+				r.id === requestId ? { ...r, status: 'APPROVED' as const } : r,
 			);
 			setRequests(updReqs);
 			localStorage.setItem('asg_requests', JSON.stringify(updReqs));
 
 			const updGroups = groups.map((g) => {
-				if (
-					g.id === req.groupId &&
-					!g.memberIds.includes(req.userId)
-				) {
-					return {
-						...g,
-						memberIds: [...g.memberIds, req.userId],
-					};
+				if (g.id === req.groupId && !g.memberIds.includes(req.userId)) {
+					return { ...g, memberIds: [...g.memberIds, req.userId] };
 				}
 				return g;
 			});
 			setGroups(updGroups);
 			localStorage.setItem('asg_groups', JSON.stringify(updGroups));
+
+			try {
+				await fetch('/api/requests', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						action: 'approve',
+						requestId,
+					}),
+				});
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (e) {
+				console.warn('Could not approve request on remote DB.');
+			}
 		},
 		[requests, groups],
 	);
 
 	const declineRequest = useCallback(
-		(requestId: string) => {
+		async (requestId: string) => {
 			const updReqs = requests.map((r) =>
-				r.id === requestId
-					? { ...r, status: 'DECLINED' as const }
-					: r,
+				r.id === requestId ? { ...r, status: 'DECLINED' as const } : r,
 			);
 			setRequests(updReqs);
 			localStorage.setItem('asg_requests', JSON.stringify(updReqs));
+
+			try {
+				await fetch('/api/requests', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						action: 'decline',
+						requestId,
+					}),
+				});
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (e) {
+				console.warn('Could not decline request on remote DB.');
+			}
 		},
 		[requests],
 	);
 
 	/* ─── Feed Messages ─── */
 	const postMessage = useCallback(
-		(
+		async (
 			groupId: string,
 			content: string,
 			fileName?: string,
@@ -341,40 +470,283 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 				fileUrl,
 				createdAt: new Date().toISOString(),
 			};
+
 			const updated = [...feedMessages, msg];
 			setFeedMessages(updated);
 			localStorage.setItem('asg_feed', JSON.stringify(updated));
+
+			try {
+				const res = await fetch('/api/feed', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						groupId,
+						userId: currentUser.id,
+						content,
+						fileName,
+						fileUrl,
+					}),
+				});
+				const data = await res.json();
+				if (data.message && !data.offline) {
+					// Replace optimistic message with true DB representation
+					setFeedMessages((prev) =>
+						prev.map((m) =>
+							m.content === content && m.userId === currentUser.id
+								? data.message
+								: m,
+						),
+					);
+				}
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (e) {
+				console.warn('Could not save feed message to remote DB.');
+			}
 		},
 		[currentUser, feedMessages],
 	);
 
 	const updateProfile = useCallback(
-		(name: string, avatarUrl: string) => {
+		async (name: string, avatarUrl: string) => {
 			if (!currentUser) return;
 			const updatedUser = { ...currentUser, name, avatarUrl };
 			setCurrentUser(updatedUser);
-			localStorage.setItem('asg_current_user', JSON.stringify(updatedUser));
+			localStorage.setItem(
+				'asg_current_user',
+				JSON.stringify(updatedUser),
+			);
+
+			try {
+				await fetch('/api/auth', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(updatedUser),
+				});
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (e) {
+				console.warn('Could not sync profile update to remote DB.');
+			}
 		},
 		[currentUser],
+	);
+
+	const fetchFeedMessages = useCallback(async (groupId: string) => {
+		try {
+			const res = await fetch(`/api/feed?groupId=${groupId}`);
+			const data = await res.json();
+			if (data.messages && !data.offline) {
+				setFeedMessages((prev) => {
+					const otherGroupMsgs = prev.filter(
+						(m) => m.groupId !== groupId,
+					);
+					return [...otherGroupMsgs, ...data.messages];
+				});
+			}
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (e) {
+			console.warn('Feed API fetch failed. Using cached messages.');
+		}
+	}, []);
+
+	const createGroup = useCallback(
+		async (
+			name: string,
+			description: string,
+			subject: string,
+			meetingFrequency: string,
+			minMembers: number,
+			maxMembers: number,
+		) => {
+			if (!currentUser)
+				return { success: false, error: 'User not signed in' };
+
+			const newLocalGroup: Group = {
+				id: `group_${Date.now()}`,
+				name,
+				description,
+				subject,
+				meetingFrequency,
+				minMembers,
+				maxMembers,
+				leaderId: currentUser.id,
+				memberIds: [currentUser.id],
+			};
+
+			setGroups((prev) => [...prev, newLocalGroup]);
+
+			try {
+				const res = await fetch('/api/groups', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						name,
+						description,
+						subject,
+						meetingFrequency,
+						minMembers,
+						maxMembers,
+						leaderId: currentUser.id,
+					}),
+				});
+				const data = await res.json();
+				if (data.success && data.group) {
+					setGroups((prev) =>
+						prev.map((g) =>
+							g.id === newLocalGroup.id ? data.group : g,
+						),
+					);
+					return { success: true };
+				}
+				return {
+					success: false,
+					error: data.error || 'Failed to create group',
+				};
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (e) {
+				console.warn('Failed to persist group creation to database.');
+				const savedGroups = localStorage.getItem('asg_groups');
+				const list = savedGroups
+					? JSON.parse(savedGroups)
+					: MOCK_GROUPS;
+				const updated = [...list, newLocalGroup];
+				localStorage.setItem('asg_groups', JSON.stringify(updated));
+				return { success: true };
+			}
+		},
+		[currentUser],
+	);
+
+	const deleteMessage = useCallback(async (messageId: string) => {
+		setFeedMessages((prev) => prev.filter((m) => m.id !== messageId));
+
+		const savedFeed = localStorage.getItem('asg_feed');
+		if (savedFeed) {
+			const list = JSON.parse(savedFeed) as FeedMessage[];
+			localStorage.setItem(
+				'asg_feed',
+				JSON.stringify(list.filter((m) => m.id !== messageId)),
+			);
+		}
+
+		try {
+			await fetch(`/api/feed?messageId=${messageId}`, {
+				method: 'DELETE',
+			});
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (e) {
+			console.warn('Could not sync message deletion to remote DB.');
+		}
+	}, []);
+
+	const updateGroupSettings = useCallback(
+		async (
+			groupId: string,
+			settings: {
+				name?: string;
+				description?: string;
+				meetingFrequency?: string;
+				isPrivate?: boolean;
+				profanityFilter?: boolean;
+				kickUserId?: string;
+				deleteLinkId?: string;
+				deleteFileId?: string;
+			},
+		) => {
+			setGroups((prev) =>
+				prev.map((g) => {
+					if (g.id !== groupId) return g;
+					let updatedMemberIds = g.memberIds;
+					if (settings.kickUserId) {
+						updatedMemberIds = g.memberIds.filter(
+							(id) => id !== settings.kickUserId,
+						);
+					}
+					return {
+						...g,
+						name:
+							settings.name !== undefined
+								? settings.name
+								: g.name,
+						description:
+							settings.description !== undefined
+								? settings.description
+								: g.description,
+						meetingFrequency:
+							settings.meetingFrequency !== undefined
+								? settings.meetingFrequency
+								: g.meetingFrequency,
+						isPrivate:
+							settings.isPrivate !== undefined
+								? settings.isPrivate
+								: g.isPrivate,
+						profanityFilter:
+							settings.profanityFilter !== undefined
+								? settings.profanityFilter
+								: g.profanityFilter,
+						memberIds: updatedMemberIds,
+					};
+				}),
+			);
+
+			if (settings.deleteLinkId || settings.deleteFileId) {
+				const messageId =
+					settings.deleteLinkId || settings.deleteFileId;
+				if (messageId) {
+					setFeedMessages((prev) =>
+						prev.filter((m) => m.id !== messageId),
+					);
+				}
+			}
+
+			try {
+				const res = await fetch('/api/groups', {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ groupId, ...settings }),
+				});
+				const data = await res.json();
+				if (data.success && data.group) {
+					setGroups((prev) =>
+						prev.map((g) => (g.id === groupId ? data.group : g)),
+					);
+					return { success: true };
+				}
+				return {
+					success: false,
+					error: data.error || 'Failed to update settings',
+				};
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (e) {
+				console.warn('Could not sync group update to remote DB.');
+				return { success: true };
+			}
+		},
+		[],
 	);
 
 	return (
 		<AppContext.Provider
 			value={{
 				currentUser,
-				users: MOCK_USERS,
+				users,
 				groups,
 				requests,
 				feedMessages,
 				theme,
 				hydrated,
 				toggleTheme,
-				switchUser,
+				loginUser,
+				registerUser,
+				logoutUser,
 				sendJoinRequest,
 				approveRequest,
 				declineRequest,
 				postMessage,
 				updateProfile,
+				fetchFeedMessages,
+				createGroup,
+				deleteMessage,
+				updateGroupSettings,
 			}}
 		>
 			{children}

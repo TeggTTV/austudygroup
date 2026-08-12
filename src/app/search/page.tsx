@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAppContext } from '@/components/AppContext';
 import Nav from '@/components/Nav';
@@ -10,16 +10,11 @@ import { Input } from '@/components/ui/Input';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Slider } from '@/components/ui/Slider';
 import { ClipLoader } from 'react-spinners';
+import Image from 'next/image';
 
 function SearchContent() {
-	const {
-		currentUser,
-		groups,
-		requests,
-		sendJoinRequest,
-		users,
-		hydrated,
-	} = useAppContext();
+	const { currentUser, groups, requests, sendJoinRequest, users, hydrated } =
+		useAppContext();
 	const searchParams = useSearchParams();
 	const router = useRouter();
 
@@ -28,11 +23,14 @@ function SearchContent() {
 	const [selectedFrequency, setSelectedFrequency] = useState('');
 	const [minMembers, setMinMembers] = useState(1);
 	const [maxMembers, setMaxMembers] = useState(15);
-	const [selectedGroup, setSelectedGroup] = useState<(typeof groups)[number] | null>(null);
+	const [selectedGroup, setSelectedGroup] = useState<
+		(typeof groups)[number] | null
+	>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		const q = searchParams.get('q');
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		if (q) setQuery(q);
 		const gp = searchParams.get('group');
 		if (gp) {
@@ -42,13 +40,16 @@ function SearchContent() {
 	}, [searchParams, groups]);
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setIsLoading(true);
 		const timer = setTimeout(() => setIsLoading(false), 500);
 		return () => clearTimeout(timer);
 	}, [query, selectedSubject, selectedFrequency, minMembers, maxMembers]);
 
 	const subjects = Array.from(new Set(groups.map((g) => g.subject)));
-	const frequencies = Array.from(new Set(groups.map((g) => g.meetingFrequency)));
+	const frequencies = Array.from(
+		new Set(groups.map((g) => g.meetingFrequency)),
+	);
 
 	const filteredGroups = groups.filter((g) => {
 		const matchQ =
@@ -56,7 +57,9 @@ function SearchContent() {
 			g.description.toLowerCase().includes(query.toLowerCase()) ||
 			g.subject.toLowerCase().includes(query.toLowerCase());
 		const matchSub = selectedSubject ? g.subject === selectedSubject : true;
-		const matchFreq = selectedFrequency ? g.meetingFrequency === selectedFrequency : true;
+		const matchFreq = selectedFrequency
+			? g.meetingFrequency === selectedFrequency
+			: true;
 		const matchMin = g.minMembers >= minMembers;
 		const matchMax = g.maxMembers <= maxMembers;
 		return matchQ && matchSub && matchFreq && matchMin && matchMax;
@@ -67,13 +70,24 @@ function SearchContent() {
 	const getMemberDetails = (ids: string[]) =>
 		users.filter((u) => ids.includes(u.id));
 	const hasRequested = (gid: string) =>
-		currentUser ? requests.some((r) => r.groupId === gid && r.userId === currentUser.id) : false;
+		currentUser
+			? requests.some(
+					(r) => r.groupId === gid && r.userId === currentUser.id,
+				)
+			: false;
 	const getRequestStatus = (gid: string) => {
 		if (!currentUser) return null;
-		return requests.find((r) => r.groupId === gid && r.userId === currentUser.id)?.status ?? null;
+		return (
+			requests.find(
+				(r) => r.groupId === gid && r.userId === currentUser.id,
+			)?.status ?? null
+		);
 	};
 	const isMember = (g: (typeof groups)[number]) =>
-		currentUser ? g.memberIds.includes(currentUser.id) || g.leaderId === currentUser.id : false;
+		currentUser
+			? g.memberIds.includes(currentUser.id) ||
+				g.leaderId === currentUser.id
+			: false;
 
 	const clearFilters = () => {
 		setSelectedSubject('');
@@ -84,7 +98,12 @@ function SearchContent() {
 		router.push('/search');
 	};
 
-	const hasActiveFilters = selectedSubject || selectedFrequency || query || minMembers > 1 || maxMembers < 15;
+	const hasActiveFilters =
+		selectedSubject ||
+		selectedFrequency ||
+		query ||
+		minMembers > 1 ||
+		maxMembers < 15;
 
 	if (!hydrated) return null;
 
@@ -95,12 +114,17 @@ function SearchContent() {
 			<main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
 				<div className="flex flex-col lg:flex-row gap-8">
 					{/* ─── Sidebar ─── */}
-					<aside className="w-full lg:w-60 flex-shrink-0">
+					<aside className="w-full lg:w-60 shrink-0">
 						<div className="rounded-xl border border-border bg-surface p-5 sticky top-20">
 							<div className="flex items-center justify-between mb-5">
-								<h2 className="text-sm font-bold text-text-primary">Filters</h2>
+								<h2 className="text-sm font-bold text-text-primary">
+									Filters
+								</h2>
 								{hasActiveFilters && (
-									<button onClick={clearFilters} className="text-xs text-primary hover:underline font-semibold">
+									<button
+										onClick={clearFilters}
+										className="text-xs text-primary hover:underline font-semibold"
+									>
 										Clear
 									</button>
 								)}
@@ -126,8 +150,16 @@ function SearchContent() {
 											<Checkbox
 												key={sub}
 												label={sub}
-												checked={selectedSubject === sub}
-												onChange={() => setSelectedSubject(selectedSubject === sub ? '' : sub)}
+												checked={
+													selectedSubject === sub
+												}
+												onChange={() =>
+													setSelectedSubject(
+														selectedSubject === sub
+															? ''
+															: sub,
+													)
+												}
 											/>
 										))}
 									</div>
@@ -143,8 +175,16 @@ function SearchContent() {
 											<Checkbox
 												key={f}
 												label={f}
-												checked={selectedFrequency === f}
-												onChange={() => setSelectedFrequency(selectedFrequency === f ? '' : f)}
+												checked={
+													selectedFrequency === f
+												}
+												onChange={() =>
+													setSelectedFrequency(
+														selectedFrequency === f
+															? ''
+															: f,
+													)
+												}
 											/>
 										))}
 									</div>
@@ -156,7 +196,9 @@ function SearchContent() {
 									min="1"
 									max="15"
 									value={minMembers}
-									onChange={(e) => setMinMembers(+e.target.value)}
+									onChange={(e) =>
+										setMinMembers(+e.target.value)
+									}
 								/>
 
 								<Slider
@@ -164,16 +206,22 @@ function SearchContent() {
 									min="1"
 									max="15"
 									value={maxMembers}
-									onChange={(e) => setMaxMembers(+e.target.value)}
+									onChange={(e) =>
+										setMaxMembers(+e.target.value)
+									}
 								/>
 							</div>
 						</div>
 					</aside>
 
 					{/* ─── Results ─── */}
-					<div className="flex-grow">
+					<div className="grow">
 						<p className="text-sm text-text-muted mb-5">
-							Showing <span className="font-semibold text-text-primary">{filteredGroups.length}</span> study groups
+							Showing{' '}
+							<span className="font-semibold text-text-primary">
+								{filteredGroups.length}
+							</span>{' '}
+							study groups
 						</p>
 
 						{isLoading ? (
@@ -182,9 +230,16 @@ function SearchContent() {
 							</div>
 						) : filteredGroups.length === 0 ? (
 							<div className="text-center py-20 rounded-xl border border-dashed border-border">
-								<FiSearch size={28} className="mx-auto text-text-muted mb-3" />
-								<h3 className="text-sm font-bold text-text-primary">No groups found</h3>
-								<p className="mt-1 text-xs text-text-muted">Try adjusting your filters.</p>
+								<FiSearch
+									size={28}
+									className="mx-auto text-text-muted mb-3"
+								/>
+								<h3 className="text-sm font-bold text-text-primary">
+									No groups found
+								</h3>
+								<p className="mt-1 text-xs text-text-muted">
+									Try adjusting your filters.
+								</p>
 							</div>
 						) : (
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -199,26 +254,41 @@ function SearchContent() {
 												<span className="inline-flex items-center rounded-full bg-primary-light px-2 py-0.5 text-[11px] font-semibold text-primary">
 													{group.subject}
 												</span>
-												<span className="text-[11px] text-text-muted">{group.meetingFrequency}</span>
+												<span className="text-[11px] text-text-muted">
+													{group.meetingFrequency}
+												</span>
 											</div>
 											<h3 className="mt-3 text-sm font-bold text-text-primary group-hover:text-primary transition-colors">
 												{group.name}
 											</h3>
-											<p className="mt-1.5 text-xs text-text-secondary line-clamp-2 leading-relaxed">{group.description}</p>
+											<p className="mt-1.5 text-xs text-text-secondary line-clamp-2 leading-relaxed">
+												{group.description}
+											</p>
 										</div>
 										<div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-text-muted">
 											<span className="flex items-center gap-1">
 												<FiUsers size={12} />
-												{group.memberIds.length}/{group.maxMembers}
+												{group.memberIds.length}/
+												{group.maxMembers}
 											</span>
 											{hasRequested(group.id) ? (
 												<span className="font-semibold text-warning">
-													{getRequestStatus(group.id) === 'PENDING' ? 'Pending' : getRequestStatus(group.id)}
+													{getRequestStatus(
+														group.id,
+													) === 'PENDING'
+														? 'Pending'
+														: getRequestStatus(
+																group.id,
+															)}
 												</span>
 											) : isMember(group) ? (
-												<span className="font-semibold text-success">Member</span>
+												<span className="font-semibold text-success">
+													Member
+												</span>
 											) : (
-												<span className="font-semibold text-primary group-hover:underline">View →</span>
+												<span className="font-semibold text-primary group-hover:underline">
+													View →
+												</span>
 											)}
 										</div>
 									</div>
@@ -241,10 +311,15 @@ function SearchContent() {
 								<span className="inline-flex items-center rounded-full bg-primary-light px-2.5 py-0.5 text-[11px] font-semibold text-primary mb-1">
 									{selectedGroup.subject}
 								</span>
-								<h2 className="text-lg font-bold text-text-primary">{selectedGroup.name}</h2>
+								<h2 className="text-lg font-bold text-text-primary">
+									{selectedGroup.name}
+								</h2>
 							</div>
 							<button
-								onClick={() => { setSelectedGroup(null); router.push('/search'); }}
+								onClick={() => {
+									setSelectedGroup(null);
+									router.push('/search');
+								}}
 								className="rounded-lg p-1.5 text-text-muted hover:bg-surface-secondary hover:text-text-primary transition-all"
 							>
 								<FiX size={18} />
@@ -256,19 +331,31 @@ function SearchContent() {
 							{/* Left */}
 							<div className="md:col-span-2 space-y-5">
 								<div>
-									<h4 className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">Description</h4>
+									<h4 className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
+										Description
+									</h4>
 									<p className="text-sm text-text-secondary leading-relaxed bg-surface-secondary p-4 rounded-xl border border-border">
 										{selectedGroup.description}
 									</p>
 								</div>
 								<div className="grid grid-cols-2 gap-3 text-xs">
 									<div className="bg-surface-secondary p-3 rounded-xl border border-border">
-										<span className="text-text-muted block">Frequency</span>
-										<span className="font-semibold text-text-primary mt-0.5 block">{selectedGroup.meetingFrequency}</span>
+										<span className="text-text-muted block">
+											Frequency
+										</span>
+										<span className="font-semibold text-text-primary mt-0.5 block">
+											{selectedGroup.meetingFrequency}
+										</span>
 									</div>
 									<div className="bg-surface-secondary p-3 rounded-xl border border-border">
-										<span className="text-text-muted block">Leader</span>
-										<span className="font-semibold text-text-primary mt-0.5 block">{getLeaderName(selectedGroup.leaderId)}</span>
+										<span className="text-text-muted block">
+											Leader
+										</span>
+										<span className="font-semibold text-text-primary mt-0.5 block">
+											{getLeaderName(
+												selectedGroup.leaderId,
+											)}
+										</span>
 									</div>
 								</div>
 							</div>
@@ -277,14 +364,33 @@ function SearchContent() {
 							<div className="space-y-5">
 								<div>
 									<h4 className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
-										Members ({selectedGroup.memberIds.length}/{selectedGroup.maxMembers})
+										Members (
+										{selectedGroup.memberIds.length}/
+										{selectedGroup.maxMembers})
 									</h4>
 									<div className="space-y-1.5 max-h-48 overflow-y-auto">
-										{getMemberDetails(selectedGroup.memberIds).map((m) => (
-											<div key={m.id} className="flex items-center space-x-2 p-2 rounded-lg bg-surface-secondary border border-border">
-												<img src={m.avatarUrl} alt={m.name} className="h-6 w-6 rounded-full object-cover" />
-												<span className="text-xs font-medium text-text-primary">{m.name}</span>
-												{m.id === selectedGroup.leaderId && (
+										{getMemberDetails(
+											selectedGroup.memberIds,
+										).map((m) => (
+											<div
+												key={m.id}
+												className="flex items-center space-x-2 p-2 rounded-lg bg-surface-secondary border border-border"
+											>
+												<Image
+													src={
+														m.avatarUrl ||
+														'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iY3VycmVudENvbG9yIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptMCAzYzEuNjYgMCAzIDEuMzQgMyAzcy0xLjM0IDMtMyAzLTMtMS4zNC0zLTMgMS4zNC0zIDMtM3ptMCAxNC4yYy0yLjUgMC00LjcxLTEuMjgtNi0zLjIyLjAzLTEuOTkgNC0zLjA4IDYtMy4wOCAxLjk5IDAgNS45NyAxLjA5IDYgMy4wOC0xLjI5IDEuOTQtMy41IDMuMjItNiAzLjIyeiIvPjwvc3ZnPg=='
+													}
+													alt={m.name}
+													className="h-6 w-6 rounded-full object-cover"
+													width={24}
+													height={24}
+												/>
+												<span className="text-xs font-medium text-text-primary">
+													{m.name}
+												</span>
+												{m.id ===
+													selectedGroup.leaderId && (
 													<span className="text-[9px] bg-primary-light text-primary px-1.5 py-0.5 rounded-full font-bold ml-auto">
 														Leader
 													</span>
@@ -301,19 +407,31 @@ function SearchContent() {
 												🎉 You are a member!
 											</div>
 											<button
-												onClick={() => router.push(`/group/${selectedGroup.id}/feed`)}
+												onClick={() =>
+													router.push(
+														`/group/${selectedGroup.id}/feed`,
+													)
+												}
 												className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-hover transition-all shadow-sm"
 											>
 												Enter Group Feed
 											</button>
 										</div>
 									) : hasRequested(selectedGroup.id) ? (
-										<button disabled className="w-full rounded-xl bg-surface-secondary border border-border py-2.5 text-sm font-semibold text-text-muted cursor-not-allowed">
-											Request: {getRequestStatus(selectedGroup.id)}
+										<button
+											disabled
+											className="w-full rounded-xl bg-surface-secondary border border-border py-2.5 text-sm font-semibold text-text-muted cursor-not-allowed"
+										>
+											Request:{' '}
+											{getRequestStatus(selectedGroup.id)}
 										</button>
 									) : (
 										<button
-											onClick={() => sendJoinRequest(selectedGroup.id)}
+											onClick={() =>
+												sendJoinRequest(
+													selectedGroup.id,
+												)
+											}
 											className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-hover transition-all shadow-sm"
 										>
 											Request to Join
@@ -331,7 +449,13 @@ function SearchContent() {
 
 export default function SearchPage() {
 	return (
-		<Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-text-muted text-sm">Loading…</div>}>
+		<Suspense
+			fallback={
+				<div className="min-h-screen bg-background flex items-center justify-center text-text-muted text-sm">
+					Loading…
+				</div>
+			}
+		>
 			<SearchContent />
 		</Suspense>
 	);

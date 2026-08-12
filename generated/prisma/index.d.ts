@@ -410,7 +410,7 @@ export namespace Prisma {
   ? False
   : T extends Uint8Array
   ? False
-  : T extends BigInt
+  : T extends bigint
   ? False
   : T extends object
   ? True
@@ -1296,6 +1296,8 @@ export namespace Prisma {
     email: string | null
     name: string | null
     avatarUrl: string | null
+    role: string | null
+    password: string | null
     createdAt: Date | null
   }
 
@@ -1304,6 +1306,8 @@ export namespace Prisma {
     email: string | null
     name: string | null
     avatarUrl: string | null
+    role: string | null
+    password: string | null
     createdAt: Date | null
   }
 
@@ -1312,6 +1316,8 @@ export namespace Prisma {
     email: number
     name: number
     avatarUrl: number
+    role: number
+    password: number
     createdAt: number
     _all: number
   }
@@ -1322,6 +1328,8 @@ export namespace Prisma {
     email?: true
     name?: true
     avatarUrl?: true
+    role?: true
+    password?: true
     createdAt?: true
   }
 
@@ -1330,6 +1338,8 @@ export namespace Prisma {
     email?: true
     name?: true
     avatarUrl?: true
+    role?: true
+    password?: true
     createdAt?: true
   }
 
@@ -1338,6 +1348,8 @@ export namespace Prisma {
     email?: true
     name?: true
     avatarUrl?: true
+    role?: true
+    password?: true
     createdAt?: true
     _all?: true
   }
@@ -1419,6 +1431,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl: string | null
+    role: string
+    password: string
     createdAt: Date
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
@@ -1444,6 +1458,8 @@ export namespace Prisma {
     email?: boolean
     name?: boolean
     avatarUrl?: boolean
+    role?: boolean
+    password?: boolean
     createdAt?: boolean
     ledGroups?: boolean | User$ledGroupsArgs<ExtArgs>
     memberships?: boolean | User$membershipsArgs<ExtArgs>
@@ -1459,10 +1475,12 @@ export namespace Prisma {
     email?: boolean
     name?: boolean
     avatarUrl?: boolean
+    role?: boolean
+    password?: boolean
     createdAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "avatarUrl" | "createdAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "avatarUrl" | "role" | "password" | "createdAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     ledGroups?: boolean | User$ledGroupsArgs<ExtArgs>
     memberships?: boolean | User$membershipsArgs<ExtArgs>
@@ -1484,6 +1502,8 @@ export namespace Prisma {
       email: string
       name: string
       avatarUrl: string | null
+      role: string
+      password: string
       createdAt: Date
     }, ExtArgs["result"]["user"]>
     composites: {}
@@ -1885,6 +1905,8 @@ export namespace Prisma {
     readonly email: FieldRef<"User", 'String'>
     readonly name: FieldRef<"User", 'String'>
     readonly avatarUrl: FieldRef<"User", 'String'>
+    readonly role: FieldRef<"User", 'String'>
+    readonly password: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
   }
     
@@ -2400,6 +2422,8 @@ export namespace Prisma {
     meetingFrequency: string | null
     minMembers: number | null
     maxMembers: number | null
+    isPrivate: boolean | null
+    profanityFilter: boolean | null
     createdAt: Date | null
     leaderId: string | null
   }
@@ -2412,6 +2436,8 @@ export namespace Prisma {
     meetingFrequency: string | null
     minMembers: number | null
     maxMembers: number | null
+    isPrivate: boolean | null
+    profanityFilter: boolean | null
     createdAt: Date | null
     leaderId: string | null
   }
@@ -2424,6 +2450,8 @@ export namespace Prisma {
     meetingFrequency: number
     minMembers: number
     maxMembers: number
+    isPrivate: number
+    profanityFilter: number
     createdAt: number
     leaderId: number
     _all: number
@@ -2448,6 +2476,8 @@ export namespace Prisma {
     meetingFrequency?: true
     minMembers?: true
     maxMembers?: true
+    isPrivate?: true
+    profanityFilter?: true
     createdAt?: true
     leaderId?: true
   }
@@ -2460,6 +2490,8 @@ export namespace Prisma {
     meetingFrequency?: true
     minMembers?: true
     maxMembers?: true
+    isPrivate?: true
+    profanityFilter?: true
     createdAt?: true
     leaderId?: true
   }
@@ -2472,6 +2504,8 @@ export namespace Prisma {
     meetingFrequency?: true
     minMembers?: true
     maxMembers?: true
+    isPrivate?: true
+    profanityFilter?: true
     createdAt?: true
     leaderId?: true
     _all?: true
@@ -2571,6 +2605,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate: boolean
+    profanityFilter: boolean
     createdAt: Date
     leaderId: string
     _count: GroupCountAggregateOutputType | null
@@ -2602,6 +2638,8 @@ export namespace Prisma {
     meetingFrequency?: boolean
     minMembers?: boolean
     maxMembers?: boolean
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: boolean
     leaderId?: boolean
     leader?: boolean | UserDefaultArgs<ExtArgs>
@@ -2621,11 +2659,13 @@ export namespace Prisma {
     meetingFrequency?: boolean
     minMembers?: boolean
     maxMembers?: boolean
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: boolean
     leaderId?: boolean
   }
 
-  export type GroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "subject" | "meetingFrequency" | "minMembers" | "maxMembers" | "createdAt" | "leaderId", ExtArgs["result"]["group"]>
+  export type GroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "subject" | "meetingFrequency" | "minMembers" | "maxMembers" | "isPrivate" | "profanityFilter" | "createdAt" | "leaderId", ExtArgs["result"]["group"]>
   export type GroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     leader?: boolean | UserDefaultArgs<ExtArgs>
     members?: boolean | Group$membersArgs<ExtArgs>
@@ -2650,6 +2690,8 @@ export namespace Prisma {
       meetingFrequency: string
       minMembers: number
       maxMembers: number
+      isPrivate: boolean
+      profanityFilter: boolean
       createdAt: Date
       leaderId: string
     }, ExtArgs["result"]["group"]>
@@ -3055,6 +3097,8 @@ export namespace Prisma {
     readonly meetingFrequency: FieldRef<"Group", 'String'>
     readonly minMembers: FieldRef<"Group", 'Int'>
     readonly maxMembers: FieldRef<"Group", 'Int'>
+    readonly isPrivate: FieldRef<"Group", 'Boolean'>
+    readonly profanityFilter: FieldRef<"Group", 'Boolean'>
     readonly createdAt: FieldRef<"Group", 'DateTime'>
     readonly leaderId: FieldRef<"Group", 'String'>
   }
@@ -6486,6 +6530,8 @@ export namespace Prisma {
     email: 'email',
     name: 'name',
     avatarUrl: 'avatarUrl',
+    role: 'role',
+    password: 'password',
     createdAt: 'createdAt'
   };
 
@@ -6500,6 +6546,8 @@ export namespace Prisma {
     meetingFrequency: 'meetingFrequency',
     minMembers: 'minMembers',
     maxMembers: 'maxMembers',
+    isPrivate: 'isPrivate',
+    profanityFilter: 'profanityFilter',
     createdAt: 'createdAt',
     leaderId: 'leaderId'
   };
@@ -6605,6 +6653,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -6629,6 +6684,8 @@ export namespace Prisma {
     email?: StringFilter<"User"> | string
     name?: StringFilter<"User"> | string
     avatarUrl?: StringNullableFilter<"User"> | string | null
+    role?: StringFilter<"User"> | string
+    password?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     ledGroups?: GroupListRelationFilter
     memberships?: GroupMemberListRelationFilter
@@ -6641,6 +6698,8 @@ export namespace Prisma {
     email?: SortOrder
     name?: SortOrder
     avatarUrl?: SortOrder
+    role?: SortOrder
+    password?: SortOrder
     createdAt?: SortOrder
     ledGroups?: GroupOrderByRelationAggregateInput
     memberships?: GroupMemberOrderByRelationAggregateInput
@@ -6656,6 +6715,8 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringFilter<"User"> | string
     avatarUrl?: StringNullableFilter<"User"> | string | null
+    role?: StringFilter<"User"> | string
+    password?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     ledGroups?: GroupListRelationFilter
     memberships?: GroupMemberListRelationFilter
@@ -6668,6 +6729,8 @@ export namespace Prisma {
     email?: SortOrder
     name?: SortOrder
     avatarUrl?: SortOrder
+    role?: SortOrder
+    password?: SortOrder
     createdAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -6682,6 +6745,8 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"User"> | string
     name?: StringWithAggregatesFilter<"User"> | string
     avatarUrl?: StringNullableWithAggregatesFilter<"User"> | string | null
+    role?: StringWithAggregatesFilter<"User"> | string
+    password?: StringWithAggregatesFilter<"User"> | string
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
 
@@ -6696,6 +6761,8 @@ export namespace Prisma {
     meetingFrequency?: StringFilter<"Group"> | string
     minMembers?: IntFilter<"Group"> | number
     maxMembers?: IntFilter<"Group"> | number
+    isPrivate?: BoolFilter<"Group"> | boolean
+    profanityFilter?: BoolFilter<"Group"> | boolean
     createdAt?: DateTimeFilter<"Group"> | Date | string
     leaderId?: StringFilter<"Group"> | string
     leader?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -6712,6 +6779,8 @@ export namespace Prisma {
     meetingFrequency?: SortOrder
     minMembers?: SortOrder
     maxMembers?: SortOrder
+    isPrivate?: SortOrder
+    profanityFilter?: SortOrder
     createdAt?: SortOrder
     leaderId?: SortOrder
     leader?: UserOrderByWithRelationInput
@@ -6731,6 +6800,8 @@ export namespace Prisma {
     meetingFrequency?: StringFilter<"Group"> | string
     minMembers?: IntFilter<"Group"> | number
     maxMembers?: IntFilter<"Group"> | number
+    isPrivate?: BoolFilter<"Group"> | boolean
+    profanityFilter?: BoolFilter<"Group"> | boolean
     createdAt?: DateTimeFilter<"Group"> | Date | string
     leaderId?: StringFilter<"Group"> | string
     leader?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -6747,6 +6818,8 @@ export namespace Prisma {
     meetingFrequency?: SortOrder
     minMembers?: SortOrder
     maxMembers?: SortOrder
+    isPrivate?: SortOrder
+    profanityFilter?: SortOrder
     createdAt?: SortOrder
     leaderId?: SortOrder
     _count?: GroupCountOrderByAggregateInput
@@ -6767,6 +6840,8 @@ export namespace Prisma {
     meetingFrequency?: StringWithAggregatesFilter<"Group"> | string
     minMembers?: IntWithAggregatesFilter<"Group"> | number
     maxMembers?: IntWithAggregatesFilter<"Group"> | number
+    isPrivate?: BoolWithAggregatesFilter<"Group"> | boolean
+    profanityFilter?: BoolWithAggregatesFilter<"Group"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Group"> | Date | string
     leaderId?: StringWithAggregatesFilter<"Group"> | string
   }
@@ -6957,6 +7032,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     ledGroups?: GroupCreateNestedManyWithoutLeaderInput
     memberships?: GroupMemberCreateNestedManyWithoutUserInput
@@ -6969,6 +7046,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     ledGroups?: GroupUncheckedCreateNestedManyWithoutLeaderInput
     memberships?: GroupMemberUncheckedCreateNestedManyWithoutUserInput
@@ -6980,6 +7059,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledGroups?: GroupUpdateManyWithoutLeaderNestedInput
     memberships?: GroupMemberUpdateManyWithoutUserNestedInput
@@ -6991,6 +7072,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledGroups?: GroupUncheckedUpdateManyWithoutLeaderNestedInput
     memberships?: GroupMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -7003,6 +7086,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
   }
 
@@ -7010,6 +7095,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -7017,6 +7104,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -7028,6 +7117,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     leader: UserCreateNestedOneWithoutLedGroupsInput
     members?: GroupMemberCreateNestedManyWithoutGroupInput
@@ -7043,6 +7134,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     leaderId: string
     members?: GroupMemberUncheckedCreateNestedManyWithoutGroupInput
@@ -7057,6 +7150,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     leader?: UserUpdateOneRequiredWithoutLedGroupsNestedInput
     members?: GroupMemberUpdateManyWithoutGroupNestedInput
@@ -7071,6 +7166,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     leaderId?: StringFieldUpdateOperationsInput | string
     members?: GroupMemberUncheckedUpdateManyWithoutGroupNestedInput
@@ -7086,6 +7183,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     leaderId: string
   }
@@ -7097,6 +7196,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -7107,6 +7208,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     leaderId?: StringFieldUpdateOperationsInput | string
   }
@@ -7355,6 +7458,8 @@ export namespace Prisma {
     email?: SortOrder
     name?: SortOrder
     avatarUrl?: SortOrder
+    role?: SortOrder
+    password?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -7363,6 +7468,8 @@ export namespace Prisma {
     email?: SortOrder
     name?: SortOrder
     avatarUrl?: SortOrder
+    role?: SortOrder
+    password?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -7371,6 +7478,8 @@ export namespace Prisma {
     email?: SortOrder
     name?: SortOrder
     avatarUrl?: SortOrder
+    role?: SortOrder
+    password?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -7436,6 +7545,11 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
@@ -7449,6 +7563,8 @@ export namespace Prisma {
     meetingFrequency?: SortOrder
     minMembers?: SortOrder
     maxMembers?: SortOrder
+    isPrivate?: SortOrder
+    profanityFilter?: SortOrder
     createdAt?: SortOrder
     leaderId?: SortOrder
   }
@@ -7466,6 +7582,8 @@ export namespace Prisma {
     meetingFrequency?: SortOrder
     minMembers?: SortOrder
     maxMembers?: SortOrder
+    isPrivate?: SortOrder
+    profanityFilter?: SortOrder
     createdAt?: SortOrder
     leaderId?: SortOrder
   }
@@ -7478,6 +7596,8 @@ export namespace Prisma {
     meetingFrequency?: SortOrder
     minMembers?: SortOrder
     maxMembers?: SortOrder
+    isPrivate?: SortOrder
+    profanityFilter?: SortOrder
     createdAt?: SortOrder
     leaderId?: SortOrder
   }
@@ -7501,6 +7621,14 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type GroupScalarRelationFilter = {
@@ -7830,6 +7958,10 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type UserUpdateOneRequiredWithoutLedGroupsNestedInput = {
     create?: XOR<UserCreateWithoutLedGroupsInput, UserUncheckedCreateWithoutLedGroupsInput>
     connectOrCreate?: UserCreateOrConnectWithoutLedGroupsInput
@@ -8118,6 +8250,11 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -8145,6 +8282,14 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type GroupCreateWithoutLeaderInput = {
     id?: string
     name: string
@@ -8153,6 +8298,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     members?: GroupMemberCreateNestedManyWithoutGroupInput
     requests?: JoinRequestCreateNestedManyWithoutGroupInput
@@ -8167,6 +8314,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     members?: GroupMemberUncheckedCreateNestedManyWithoutGroupInput
     requests?: JoinRequestUncheckedCreateNestedManyWithoutGroupInput
@@ -8280,6 +8429,8 @@ export namespace Prisma {
     meetingFrequency?: StringFilter<"Group"> | string
     minMembers?: IntFilter<"Group"> | number
     maxMembers?: IntFilter<"Group"> | number
+    isPrivate?: BoolFilter<"Group"> | boolean
+    profanityFilter?: BoolFilter<"Group"> | boolean
     createdAt?: DateTimeFilter<"Group"> | Date | string
     leaderId?: StringFilter<"Group"> | string
   }
@@ -8371,6 +8522,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     memberships?: GroupMemberCreateNestedManyWithoutUserInput
     requests?: JoinRequestCreateNestedManyWithoutUserInput
@@ -8382,6 +8535,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     memberships?: GroupMemberUncheckedCreateNestedManyWithoutUserInput
     requests?: JoinRequestUncheckedCreateNestedManyWithoutUserInput
@@ -8479,6 +8634,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     memberships?: GroupMemberUpdateManyWithoutUserNestedInput
     requests?: JoinRequestUpdateManyWithoutUserNestedInput
@@ -8489,6 +8646,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     memberships?: GroupMemberUncheckedUpdateManyWithoutUserNestedInput
     requests?: JoinRequestUncheckedUpdateManyWithoutUserNestedInput
@@ -8551,6 +8710,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     leader: UserCreateNestedOneWithoutLedGroupsInput
     requests?: JoinRequestCreateNestedManyWithoutGroupInput
@@ -8565,6 +8726,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     leaderId: string
     requests?: JoinRequestUncheckedCreateNestedManyWithoutGroupInput
@@ -8581,6 +8744,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     ledGroups?: GroupCreateNestedManyWithoutLeaderInput
     requests?: JoinRequestCreateNestedManyWithoutUserInput
@@ -8592,6 +8757,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     ledGroups?: GroupUncheckedCreateNestedManyWithoutLeaderInput
     requests?: JoinRequestUncheckedCreateNestedManyWithoutUserInput
@@ -8621,6 +8788,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     leader?: UserUpdateOneRequiredWithoutLedGroupsNestedInput
     requests?: JoinRequestUpdateManyWithoutGroupNestedInput
@@ -8634,6 +8803,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     leaderId?: StringFieldUpdateOperationsInput | string
     requests?: JoinRequestUncheckedUpdateManyWithoutGroupNestedInput
@@ -8655,6 +8826,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledGroups?: GroupUpdateManyWithoutLeaderNestedInput
     requests?: JoinRequestUpdateManyWithoutUserNestedInput
@@ -8665,6 +8838,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledGroups?: GroupUncheckedUpdateManyWithoutLeaderNestedInput
     requests?: JoinRequestUncheckedUpdateManyWithoutUserNestedInput
@@ -8679,6 +8854,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     leader: UserCreateNestedOneWithoutLedGroupsInput
     members?: GroupMemberCreateNestedManyWithoutGroupInput
@@ -8693,6 +8870,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     leaderId: string
     members?: GroupMemberUncheckedCreateNestedManyWithoutGroupInput
@@ -8709,6 +8888,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     ledGroups?: GroupCreateNestedManyWithoutLeaderInput
     memberships?: GroupMemberCreateNestedManyWithoutUserInput
@@ -8720,6 +8901,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     ledGroups?: GroupUncheckedCreateNestedManyWithoutLeaderInput
     memberships?: GroupMemberUncheckedCreateNestedManyWithoutUserInput
@@ -8749,6 +8932,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     leader?: UserUpdateOneRequiredWithoutLedGroupsNestedInput
     members?: GroupMemberUpdateManyWithoutGroupNestedInput
@@ -8762,6 +8947,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     leaderId?: StringFieldUpdateOperationsInput | string
     members?: GroupMemberUncheckedUpdateManyWithoutGroupNestedInput
@@ -8783,6 +8970,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledGroups?: GroupUpdateManyWithoutLeaderNestedInput
     memberships?: GroupMemberUpdateManyWithoutUserNestedInput
@@ -8793,6 +8982,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledGroups?: GroupUncheckedUpdateManyWithoutLeaderNestedInput
     memberships?: GroupMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -8807,6 +8998,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     leader: UserCreateNestedOneWithoutLedGroupsInput
     members?: GroupMemberCreateNestedManyWithoutGroupInput
@@ -8821,6 +9014,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
     leaderId: string
     members?: GroupMemberUncheckedCreateNestedManyWithoutGroupInput
@@ -8837,6 +9032,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     ledGroups?: GroupCreateNestedManyWithoutLeaderInput
     memberships?: GroupMemberCreateNestedManyWithoutUserInput
@@ -8848,6 +9045,8 @@ export namespace Prisma {
     email: string
     name: string
     avatarUrl?: string | null
+    role?: string
+    password?: string
     createdAt?: Date | string
     ledGroups?: GroupUncheckedCreateNestedManyWithoutLeaderInput
     memberships?: GroupMemberUncheckedCreateNestedManyWithoutUserInput
@@ -8877,6 +9076,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     leader?: UserUpdateOneRequiredWithoutLedGroupsNestedInput
     members?: GroupMemberUpdateManyWithoutGroupNestedInput
@@ -8890,6 +9091,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     leaderId?: StringFieldUpdateOperationsInput | string
     members?: GroupMemberUncheckedUpdateManyWithoutGroupNestedInput
@@ -8911,6 +9114,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledGroups?: GroupUpdateManyWithoutLeaderNestedInput
     memberships?: GroupMemberUpdateManyWithoutUserNestedInput
@@ -8921,6 +9126,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledGroups?: GroupUncheckedUpdateManyWithoutLeaderNestedInput
     memberships?: GroupMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -8935,6 +9142,8 @@ export namespace Prisma {
     meetingFrequency: string
     minMembers: number
     maxMembers: number
+    isPrivate?: boolean
+    profanityFilter?: boolean
     createdAt?: Date | string
   }
 
@@ -8967,6 +9176,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: GroupMemberUpdateManyWithoutGroupNestedInput
     requests?: JoinRequestUpdateManyWithoutGroupNestedInput
@@ -8980,6 +9191,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: GroupMemberUncheckedUpdateManyWithoutGroupNestedInput
     requests?: JoinRequestUncheckedUpdateManyWithoutGroupNestedInput
@@ -8993,6 +9206,8 @@ export namespace Prisma {
     meetingFrequency?: StringFieldUpdateOperationsInput | string
     minMembers?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    profanityFilter?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

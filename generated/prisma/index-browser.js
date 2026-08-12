@@ -119,6 +119,8 @@ exports.Prisma.UserScalarFieldEnum = {
   email: 'email',
   name: 'name',
   avatarUrl: 'avatarUrl',
+  role: 'role',
+  password: 'password',
   createdAt: 'createdAt'
 };
 
@@ -130,6 +132,8 @@ exports.Prisma.GroupScalarFieldEnum = {
   meetingFrequency: 'meetingFrequency',
   minMembers: 'minMembers',
   maxMembers: 'maxMembers',
+  isPrivate: 'isPrivate',
+  profanityFilter: 'profanityFilter',
   createdAt: 'createdAt',
   leaderId: 'leaderId'
 };

@@ -9,7 +9,7 @@ import { FiMenu, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Nav() {
-  const { currentUser, switchUser } = useAppContext();
+  const { currentUser } = useAppContext();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -52,27 +52,6 @@ export default function Nav() {
 
           {/* Right Section */}
           <div className="flex items-center space-x-3">
-            {/* Demo role switcher (Desktop/Tablet) */}
-            <div className="hidden sm:flex items-center rounded-lg bg-surface-secondary p-0.5 border border-border text-xs">
-              <span className="px-2 text-text-muted font-medium">Demo:</span>
-              {(['APPLICANT', 'LEADER', 'GUEST'] as const).map((role) => {
-                const isActive = role === 'GUEST' ? !currentUser : currentUser?.role === role;
-                return (
-                  <button
-                    key={role}
-                    onClick={() => switchUser(role)}
-                    className={`px-2 py-1 rounded-md transition-all capitalize ${
-                      isActive
-                        ? 'bg-primary text-white font-semibold shadow-sm'
-                        : 'text-text-muted hover:text-text-primary'
-                    }`}
-                  >
-                    {role.toLowerCase()}
-                  </button>
-                );
-              })}
-            </div>
-
             {/* Profile Menu */}
             <ProfileMenu />
 
@@ -114,34 +93,6 @@ export default function Nav() {
                   </Link>
                 );
               })}
-              
-              {/* Demo role switcher inside mobile menu */}
-              <div className="pt-2 border-t border-border mt-2">
-                <span className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
-                  Demo Switching Role:
-                </span>
-                <div className="flex gap-2">
-                  {(['APPLICANT', 'LEADER', 'GUEST'] as const).map((role) => {
-                    const isActive = role === 'GUEST' ? !currentUser : currentUser?.role === role;
-                    return (
-                      <button
-                        key={role}
-                        onClick={() => {
-                          switchUser(role);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`flex-1 py-1.5 rounded-lg text-xs font-medium border text-center transition-all ${
-                          isActive
-                            ? 'bg-primary text-white border-primary shadow-sm'
-                            : 'bg-surface-secondary border-border text-text-secondary'
-                        }`}
-                      >
-                        {role.toLowerCase()}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
           </motion.div>
         )}
