@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://austudygroup.edu.au
+
+# Sitemaps
+Sitemap: https://austudygroup.edu.au/sitemap.xml

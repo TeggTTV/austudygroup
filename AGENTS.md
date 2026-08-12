@@ -1,9 +1,31 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# austudygroup
 
-# This is NOT the Next.js you know
+A Next.js application for students to find study groups quickly using MongoDB, Tailwind CSS, and TypeScript.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+## Dev environment
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+- Engine: [Yarn](https://classic.yarnpkg.com/)
+- Framework: [Next.js 16 (App Router)](https://nextjs.org/)
+- Styling: [Tailwind CSS 4](https://tailwindcss.com/)
+- Language: TypeScript
 
-<!-- END:nextjs-agent-rules -->
+## Build & test
+
+Use `yarn` for all commands:
+
+- `yarn dev`: Start the development server.
+- `yarn build`: Build the application for production.
+- `yarn start`: Run the production build.
+- `yarn lint`: Run ESLint to check for code quality issues.
+
+## Conventions
+
+- All components should reside in `src/components`.
+- Use the `src/app` directory for routing and page definitions (App Router).
+- Follow TypeScript strict mode guidelines.
+- Use Tailwind CSS utility classes for all styling; avoid custom CSS where possible.
+
+## Pitfalls
+
+- Ensure MongoDB connection strings are provided via environment variables (e.g., `MONGODB_URI`).
+- Do not manually edit files in `.next/` or other generated directories.

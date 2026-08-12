@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  name      String
+  avatarUrl String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  ledGroups    Group[]       @relation("GroupLeader")
+  memberships  GroupMember[]
+  requests     JoinRequest[]
+  feedMessages FeedMessage[]
+}
+
+model Group {
+  id               String        @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  description      String
+  subject          String
+  meetingFrequency String
+  minMembers       Int
+  maxMembers       Int
+  createdAt        DateTime      @default(now())
+  
+  // Leader
+  leaderId         String        @db.ObjectId
+  leader           User          @relation("GroupLeader", fields: [leaderId], references: [id])
+  
+  // Members and requests
+  members          GroupMember[]
+  requests         JoinRequest[]
+  feedMessages     FeedMessage[]
+}
+
+model GroupMember {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  groupId  String   @db.ObjectId
+  group    Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId   String   @db.ObjectId
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+}
+
+model JoinRequest {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  groupId   String   @db.ObjectId
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    String   // "PENDING", "APPROVED", "DECLINED"
+  createdAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+}
+
+model FeedMessage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  groupId   String   @db.ObjectId
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  fileUrl   String?
+  fileName  String?
+  createdAt DateTime @default(now())
+}
