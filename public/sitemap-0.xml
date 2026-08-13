@@ -1,16 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://austudygroup.vercel.app</loc><lastmod>2026-08-12T22:52:12.955Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/apple-icon.png</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/auth/login</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/auth/register</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/groups</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/icon0.svg</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/icon1.png</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/manifest.json</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/pending</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/privacy</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/profile</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/search</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://austudygroup.vercel.app/terms</loc><lastmod>2026-08-12T22:52:12.956Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://austudygroup.vercel.app</loc><lastmod>2026-08-13T02:31:18.400Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 </urlset>
