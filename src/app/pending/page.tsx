@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAppContext } from '@/components/AppContext';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
-import { FiCheck, FiX, FiClock, FiSend, FiArchive } from 'react-icons/fi';
+import { FiCheck, FiX, FiClock, FiSend, FiArchive, FiRefreshCw } from 'react-icons/fi';
 import Image from 'next/image';
 
 export default function PendingPage() {
@@ -16,10 +16,18 @@ export default function PendingPage() {
 		approveRequest,
 		declineRequest,
 		hydrated,
+		refreshData,
 	} = useAppContext();
 	const [activeTab, setActiveTab] = useState<'requests' | 'sent' | 'history'>(
 		'requests',
 	);
+	const [isRefreshing, setIsRefreshing] = useState(false);
+
+	const handleRefresh = async () => {
+		setIsRefreshing(true);
+		await refreshData();
+		setIsRefreshing(false);
+	};
 
 	if (!hydrated) return null;
 
@@ -78,9 +86,19 @@ export default function PendingPage() {
 			<Nav />
 
 			<main className="flex-1 mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
-				<h1 className="text-2xl font-bold text-text-primary mb-1">
-					Join Requests
-				</h1>
+				<div className="flex items-center justify-between mb-1">
+					<h1 className="text-2xl font-bold text-text-primary">
+						Join Requests
+					</h1>
+					<button
+						onClick={handleRefresh}
+						disabled={isRefreshing}
+						className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary transition-all shadow-xs cursor-pointer disabled:opacity-50"
+					>
+						<FiRefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
+						{isRefreshing ? 'Refreshing...' : 'Refresh'}
+					</button>
+				</div>
 				<p className="text-sm text-text-muted mb-8">
 					Manage your sent and received group membership requests.
 				</p>

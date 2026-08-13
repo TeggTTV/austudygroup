@@ -192,6 +192,15 @@ export default function GroupFeedPage() {
 		}
 	}, [id, fetchFeedMessages]);
 
+	// Automatically poll for new messages in the group feed every 4 seconds
+	useEffect(() => {
+		if (!id) return;
+		const interval = setInterval(() => {
+			fetchFeedMessages(id);
+		}, 4000);
+		return () => clearInterval(interval);
+	}, [id, fetchFeedMessages]);
+
 	if (!hydrated) return null;
 
 	if (!currentUser || !group) {

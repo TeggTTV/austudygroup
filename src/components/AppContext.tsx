@@ -106,6 +106,7 @@ interface AppContextType {
 			deleteFileId?: string;
 		},
 	) => Promise<{ success: boolean; error?: string }>;
+	refreshData: () => Promise<void>;
 }
 
 /* ──────────────────────────── Seed Data ──────────────────────── */
@@ -186,7 +187,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 	const [theme, setTheme] = useState<Theme>('light');
 	const [hydrated, setHydrated] = useState(false);
 
-	/* ─── Hydrate from API / localStorage Fallback ─── */
+	/* ─── Hydrate from API ─── */
 	const loadData = useCallback(async () => {
 		try {
 			// Fetch Groups
@@ -194,6 +195,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			const gData = await gRes.json();
 			if (gData.groups && !gData.offline) {
 				setGroups(gData.groups);
+			} else {
+				setGroups(MOCK_GROUPS);
 			}
 
 			// Fetch Requests
@@ -202,8 +205,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			if (rData.requests && !rData.offline) {
 				setRequests(rData.requests);
 			} else {
-				const savedRequests = localStorage.getItem('asg_requests');
-				setRequests(savedRequests ? JSON.parse(savedRequests) : []);
+				setRequests([]);
 			}
 
 			// Fetch Users
@@ -212,43 +214,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			if (uData.users && !uData.offline) {
 				setUsers(uData.users);
 			} else {
-				const savedUsers = localStorage.getItem('asg_users');
-				setUsers(savedUsers ? JSON.parse(savedUsers) : []);
+				setUsers([]);
 			}
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		} catch (e) {
-			console.warn(
-				'API requests failed. Reverting to LocalStorage cache.',
-			);
-			const savedGroups = localStorage.getItem('asg_groups');
-			setGroups(savedGroups ? JSON.parse(savedGroups) : MOCK_GROUPS);
-			const savedRequests = localStorage.getItem('asg_requests');
-			setRequests(savedRequests ? JSON.parse(savedRequests) : []);
-			const savedUsers = localStorage.getItem('asg_users');
-			setUsers(savedUsers ? JSON.parse(savedUsers) : []);
+			console.warn('API requests failed. Reverting to memory defaults.');
+			setGroups(MOCK_GROUPS);
+			setRequests([]);
+			setUsers([]);
 		}
 	}, []);
 
+	/* eslint-disable react-hooks/set-state-in-effect */
 	useEffect(() => {
-		const savedTheme = localStorage.getItem('asg_theme') as Theme | null;
-		const resolvedTheme = savedTheme || 'light';
-		// eslint-disable-next-line react-hooks/set-state-in-effect
-		setTheme(resolvedTheme);
-		document.documentElement.classList.toggle(
-			'dark',
-			resolvedTheme === 'dark',
-		);
-
-		const savedUser = localStorage.getItem('asg_current_user');
-		if (savedUser && savedUser !== 'null') {
-			setCurrentUser(JSON.parse(savedUser));
-		} else {
-			setCurrentUser(null);
-		}
+		setTheme('light');
+		document.documentElement.classList.toggle('dark', false);
+		setCurrentUser(null);
 
 		loadData();
 		setHydrated(true);
 	}, [loadData]);
+	/* eslint-enable react-hooks/set-state-in-effect */
 
 	// Reload data whenever currentUser changes
 	/* eslint-disable react-hooks/set-state-in-effect */
@@ -263,7 +249,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 	const toggleTheme = useCallback(() => {
 		setTheme((prev) => {
 			const next = prev === 'light' ? 'dark' : 'light';
-			localStorage.setItem('asg_theme', next);
 			document.documentElement.classList.toggle('dark', next === 'dark');
 			return next;
 		});
@@ -280,10 +265,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			const data = await res.json();
 			if (data.success && data.user) {
 				setCurrentUser(data.user);
-				localStorage.setItem(
-					'asg_current_user',
-					JSON.stringify(data.user),
-				);
 				return { success: true };
 			}
 			return {
@@ -319,10 +300,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 				const data = await res.json();
 				if (data.success && data.user) {
 					setCurrentUser(data.user);
-					localStorage.setItem(
-						'asg_current_user',
-						JSON.stringify(data.user),
-					);
 					return { success: true };
 				}
 				return {
@@ -339,7 +316,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
 	const logoutUser = useCallback(() => {
 		setCurrentUser(null);
-		localStorage.removeItem('asg_current_user');
 	}, []);
 
 	/* ─── Join Requests ─── */
@@ -362,7 +338,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			// Update frontend state immediately
 			const updated = [...requests, nr];
 			setRequests(updated);
-			localStorage.setItem('asg_requests', JSON.stringify(updated));
 
 			try {
 				const res = await fetch('/api/requests', {
@@ -412,7 +387,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 				return g;
 			});
 			setGroups(updGroups);
-			localStorage.setItem('asg_groups', JSON.stringify(updGroups));
 
 			try {
 				await fetch('/api/requests', {
@@ -437,7 +411,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 				r.id === requestId ? { ...r, status: 'DECLINED' as const } : r,
 			);
 			setRequests(updReqs);
-			localStorage.setItem('asg_requests', JSON.stringify(updReqs));
 
 			try {
 				await fetch('/api/requests', {
@@ -477,7 +450,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
 			const updated = [...feedMessages, msg];
 			setFeedMessages(updated);
-			localStorage.setItem('asg_feed', JSON.stringify(updated));
 
 			try {
 				const res = await fetch('/api/feed', {
@@ -515,10 +487,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			if (!currentUser) return;
 			const updatedUser = { ...currentUser, name, avatarUrl };
 			setCurrentUser(updatedUser);
-			localStorage.setItem(
-				'asg_current_user',
-				JSON.stringify(updatedUser),
-			);
 
 			try {
 				await fetch('/api/auth', {
@@ -548,7 +516,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			}
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		} catch (e) {
-			console.warn('Feed API fetch failed. Using cached messages.');
+			console.warn('Feed API fetch failed.');
 		}
 	}, []);
 
@@ -608,12 +576,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (e) {
 				console.warn('Failed to persist group creation to database.');
-				const savedGroups = localStorage.getItem('asg_groups');
-				const list = savedGroups
-					? JSON.parse(savedGroups)
-					: MOCK_GROUPS;
-				const updated = [...list, newLocalGroup];
-				localStorage.setItem('asg_groups', JSON.stringify(updated));
 				return { success: true };
 			}
 		},
@@ -622,15 +584,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
 	const deleteMessage = useCallback(async (messageId: string) => {
 		setFeedMessages((prev) => prev.filter((m) => m.id !== messageId));
-
-		const savedFeed = localStorage.getItem('asg_feed');
-		if (savedFeed) {
-			const list = JSON.parse(savedFeed) as FeedMessage[];
-			localStorage.setItem(
-				'asg_feed',
-				JSON.stringify(list.filter((m) => m.id !== messageId)),
-			);
-		}
 
 		try {
 			await fetch(`/api/feed?messageId=${messageId}`, {
@@ -751,6 +704,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 				createGroup,
 				deleteMessage,
 				updateGroupSettings,
+				refreshData: loadData,
 			}}
 		>
 			{children}
