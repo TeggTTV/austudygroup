@@ -83,6 +83,15 @@ export default function GroupFeedPage() {
 	const [resourceTitle, setResourceTitle] = useState('');
 	const [isLoading, setIsLoading] = useState(true);
 
+	const [isIdle, setIsIdle] = useState(false);
+	const [previewUrl, setPreviewUrl] = useState('');
+
+	const isImageFile = (fileName?: string) => {
+		if (!fileName) return false;
+		const ext = fileName.toLowerCase().split('.').pop();
+		return ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext || '');
+	};
+
 	// Settings state
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [settingsName, setSettingsName] = useState('');
@@ -192,14 +201,45 @@ export default function GroupFeedPage() {
 		}
 	}, [id, fetchFeedMessages]);
 
-	// Automatically poll for new messages in the group feed every 4 seconds
+	// Idle detection: if user does not perform mouse movement, click, scroll or keypress for 5 minutes, set as idle
 	useEffect(() => {
-		if (!id) return;
+		if (isIdle) return;
+
+		let timeoutId: NodeJS.Timeout;
+
+		const resetTimer = () => {
+			clearTimeout(timeoutId);
+			timeoutId = setTimeout(
+				() => {
+					setIsIdle(true);
+				},
+				5 * 60 * 1000,
+			); // 5 minutes
+		};
+
+		const events = ['mousemove', 'keydown', 'click', 'scroll'];
+		events.forEach((event) => {
+			window.addEventListener(event, resetTimer);
+		});
+
+		resetTimer();
+
+		return () => {
+			clearTimeout(timeoutId);
+			events.forEach((event) => {
+				window.removeEventListener(event, resetTimer);
+			});
+		};
+	}, [isIdle]);
+
+	// Automatically poll for new messages in the group feed every 4 seconds (if not idle)
+	useEffect(() => {
+		if (!id || isIdle) return;
 		const interval = setInterval(() => {
 			fetchFeedMessages(id);
 		}, 4000);
 		return () => clearInterval(interval);
-	}, [id, fetchFeedMessages]);
+	}, [id, fetchFeedMessages, isIdle]);
 
 	if (!hydrated) return null;
 
@@ -372,7 +412,25 @@ export default function GroupFeedPage() {
 											</p>
 											{msg.fileName && msg.fileUrl && (
 												<div
-													className={`mt-2 flex items-center space-x-1.5 p-1.5 rounded-lg text-xs ${isMe ? 'bg-white/15' : 'bg-surface-tertiary border border-border'}`}
+													onClick={() => {
+														if (
+															isImageFile(
+																msg.fileName,
+															)
+														) {
+															setPreviewUrl(
+																msg.fileUrl ||
+																	'',
+															);
+														}
+													}}
+													className={`mt-2 flex items-center space-x-1.5 p-1.5 rounded-lg text-xs ${
+														isImageFile(
+															msg.fileName,
+														)
+															? 'cursor-pointer hover:bg-white/25 hover:underline'
+															: ''
+													} ${isMe ? 'bg-white/15' : 'bg-surface-tertiary border border-border'}`}
 												>
 													<FiFile size={12} />
 													<span className="truncate font-medium text-[11px]">
@@ -578,10 +636,26 @@ export default function GroupFeedPage() {
 										key={file.id}
 										className="flex items-center justify-between p-2 rounded-lg bg-surface-secondary border border-border text-xs"
 									>
-										<div className="flex items-center space-x-1.5 truncate">
+										<div
+											onClick={() => {
+												if (
+													file.fileName &&
+													file.fileUrl &&
+													isImageFile(file.fileName)
+												) {
+													setPreviewUrl(file.fileUrl);
+												}
+											}}
+											className={`flex items-center space-x-1.5 truncate ${
+												file.fileName &&
+												isImageFile(file.fileName)
+													? 'cursor-pointer hover:underline text-primary'
+													: ''
+											}`}
+										>
 											<FiFile
 												size={12}
-												className="text-primary"
+												className="text-primary shrink-0"
 											/>
 											<span className="text-text-primary truncate font-medium text-[11px]">
 												{file.fileName}
@@ -633,7 +707,10 @@ export default function GroupFeedPage() {
 								</button>
 							</div>
 
-							<form onSubmit={handleSaveSettings} className="space-y-4">
+							<form
+								onSubmit={handleSaveSettings}
+								className="space-y-4"
+							>
 								{settingsError && (
 									<div className="text-xs text-danger bg-danger-bg border border-danger/20 p-2 rounded text-center">
 										{settingsError}
@@ -644,7 +721,9 @@ export default function GroupFeedPage() {
 									type="text"
 									label="Group Name"
 									value={settingsName}
-									onChange={(e) => setSettingsName(e.target.value)}
+									onChange={(e) =>
+										setSettingsName(e.target.value)
+									}
 									required
 								/>
 
@@ -656,7 +735,9 @@ export default function GroupFeedPage() {
 										<div className="flex gap-2 bg-surface-secondary border border-border p-1 rounded-lg">
 											<button
 												type="button"
-												onClick={() => setIsCustomFreq(false)}
+												onClick={() =>
+													setIsCustomFreq(false)
+												}
 												className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
 													!isCustomFreq
 														? 'bg-primary text-white shadow-xs'
@@ -667,7 +748,9 @@ export default function GroupFeedPage() {
 											</button>
 											<button
 												type="button"
-												onClick={() => setIsCustomFreq(true)}
+												onClick={() =>
+													setIsCustomFreq(true)
+												}
 												className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
 													isCustomFreq
 														? 'bg-primary text-white shadow-xs'
@@ -683,13 +766,25 @@ export default function GroupFeedPage() {
 										<div className="space-y-1.5">
 											<select
 												value={settingsFreq}
-												onChange={(e) => setSettingsFreq(e.target.value)}
+												onChange={(e) =>
+													setSettingsFreq(
+														e.target.value,
+													)
+												}
 												className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer"
 											>
-												<option value="Weekly">Weekly</option>
-												<option value="Bi-weekly">Bi-weekly</option>
-												<option value="Fortnightly">Fortnightly</option>
-												<option value="Monthly">Monthly</option>
+												<option value="Weekly">
+													Weekly
+												</option>
+												<option value="Bi-weekly">
+													Bi-weekly
+												</option>
+												<option value="Fortnightly">
+													Fortnightly
+												</option>
+												<option value="Monthly">
+													Monthly
+												</option>
 											</select>
 										</div>
 									) : (
@@ -699,7 +794,15 @@ export default function GroupFeedPage() {
 													Select Days
 												</label>
 												<div className="flex flex-wrap gap-2">
-													{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+													{[
+														'Mon',
+														'Tue',
+														'Wed',
+														'Thu',
+														'Fri',
+														'Sat',
+														'Sun',
+													].map((day) => (
 														<label
 															key={day}
 															className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer select-none transition-all ${
@@ -711,12 +814,22 @@ export default function GroupFeedPage() {
 															<input
 																type="checkbox"
 																className="sr-only"
-																checked={!!customDays[day]}
+																checked={
+																	!!customDays[
+																		day
+																	]
+																}
 																onChange={(e) =>
-																	setCustomDays((prev) => ({
-																		...prev,
-																		[day]: e.target.checked,
-																	}))
+																	setCustomDays(
+																		(
+																			prev,
+																		) => ({
+																			...prev,
+																			[day]: e
+																				.target
+																				.checked,
+																		}),
+																	)
 																}
 															/>
 															{day}
@@ -731,7 +844,11 @@ export default function GroupFeedPage() {
 												<input
 													type="time"
 													value={customTime}
-													onChange={(e) => setCustomTime(e.target.value)}
+													onChange={(e) =>
+														setCustomTime(
+															e.target.value,
+														)
+													}
 													className="w-full sm:w-auto rounded-lg border border-border bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
 												/>
 											</div>
@@ -746,7 +863,9 @@ export default function GroupFeedPage() {
 									<textarea
 										rows={3}
 										value={settingsDesc}
-										onChange={(e) => setSettingsDesc(e.target.value)}
+										onChange={(e) =>
+											setSettingsDesc(e.target.value)
+										}
 										className="w-full rounded-lg border border-border bg-surface-secondary p-3 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none"
 										required
 									/>
@@ -757,48 +876,83 @@ export default function GroupFeedPage() {
 									<Checkbox
 										label="Private Group (Hides from Search)"
 										checked={settingsPrivate}
-										onChange={(e) => setSettingsPrivate(e.target.checked)}
+										onChange={(e) =>
+											setSettingsPrivate(e.target.checked)
+										}
 									/>
 									<Checkbox
 										label="Enable Profanity Filter"
 										checked={settingsFilter}
-										onChange={(e) => setSettingsFilter(e.target.checked)}
+										onChange={(e) =>
+											setSettingsFilter(e.target.checked)
+										}
 									/>
 								</div>
 
 								{/* Member Management */}
 								<div>
-									<h4 className="text-xs font-bold text-text-primary mb-2">Members</h4>
+									<h4 className="text-xs font-bold text-text-primary mb-2">
+										Members
+									</h4>
 									<div className="space-y-2 max-h-40 overflow-y-auto">
-										{group.memberIds.filter((id) => id !== currentUser.id).length === 0 ? (
-											<p className="text-xs text-text-muted">No other members in this group yet.</p>
+										{group.memberIds.filter(
+											(id) => id !== currentUser.id,
+										).length === 0 ? (
+											<p className="text-xs text-text-muted">
+												No other members in this group
+												yet.
+											</p>
 										) : (
 											group.memberIds
-												.filter((id) => id !== currentUser.id)
+												.filter(
+													(id) =>
+														id !== currentUser.id,
+												)
 												.map((memberId) => {
-													const memberName = getUserName(memberId);
-													const memberAvatar = getUserAvatar(memberId);
+													const memberName =
+														getUserName(memberId);
+													const memberAvatar =
+														getUserAvatar(memberId);
 													return (
-														<div key={memberId} className="flex items-center justify-between p-2 rounded-lg bg-surface-secondary border border-border">
+														<div
+															key={memberId}
+															className="flex items-center justify-between p-2 rounded-lg bg-surface-secondary border border-border"
+														>
 															<div className="flex items-center gap-2">
 																{memberAvatar ? (
 																	<Image
-																		src={memberAvatar}
-																		alt={memberName}
+																		src={
+																			memberAvatar
+																		}
+																		alt={
+																			memberName
+																		}
 																		className="w-6 h-6 rounded-full object-cover"
-																		width={24}
-																		height={24}
+																		width={
+																			24
+																		}
+																		height={
+																			24
+																		}
 																	/>
 																) : (
 																	<div className="w-6 h-6 rounded-full bg-primary-light flex items-center justify-center text-[10px] font-bold text-primary">
-																		{memberName[0]}
+																		{
+																			memberName[0]
+																		}
 																	</div>
 																)}
-																<span className="text-xs font-medium text-text-primary">{memberName}</span>
+																<span className="text-xs font-medium text-text-primary">
+																	{memberName}
+																</span>
 															</div>
 															<button
 																type="button"
-																onClick={() => handleKickMember(memberId)}
+																onClick={() =>
+																	handleKickMember(
+																		memberId,
+																	)
+																}
 																className="text-xs text-danger hover:underline font-semibold"
 															>
 																Kick
@@ -823,10 +977,73 @@ export default function GroupFeedPage() {
 										disabled={updating}
 										className="px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50"
 									>
-										{updating ? 'Saving...' : 'Save Settings'}
+										{updating
+											? 'Saving...'
+											: 'Save Settings'}
 									</button>
 								</div>
 							</form>
+						</motion.div>
+					</div>
+				)}
+			</AnimatePresence>
+
+			{/* Idle Warning Modal */}
+			<AnimatePresence>
+				{isIdle && (
+					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+						<motion.div
+							initial={{ opacity: 0, scale: 0.95 }}
+							animate={{ opacity: 1, scale: 1 }}
+							exit={{ opacity: 0, scale: 0.95 }}
+							className="w-full max-w-sm rounded-2xl border border-border bg-surface p-6 shadow-xl space-y-4 text-center"
+						>
+							<span className="text-3xl">⏰</span>
+							<h3 className="text-base font-bold text-text-primary">
+								Are you still there?
+							</h3>
+							<p className="text-xs text-text-muted leading-relaxed">
+								We paused automatic updates to save resources
+								since you have been inactive.
+							</p>
+							<button
+								onClick={() => setIsIdle(false)}
+								className="w-full rounded-lg bg-primary py-2.5 text-xs font-semibold text-white hover:bg-primary-hover shadow-sm transition-all cursor-pointer"
+							>
+								Yes, I&apos;m here{' '}
+							</button>
+						</motion.div>
+					</div>
+				)}
+			</AnimatePresence>
+
+			{/* Image Preview Modal */}
+			<AnimatePresence>
+				{previewUrl && (
+					<div
+						className="fixed inset-0 z-55 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 cursor-zoom-out"
+						onClick={() => setPreviewUrl('')}
+					>
+						<motion.div
+							initial={{ opacity: 0, scale: 0.95 }}
+							animate={{ opacity: 1, scale: 1 }}
+							exit={{ opacity: 0, scale: 0.95 }}
+							className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-xl bg-surface/5"
+							onClick={(e) => e.stopPropagation()}
+						>
+							<button
+								onClick={() => setPreviewUrl('')}
+								className="absolute top-3 right-3 rounded-full bg-black/60 p-2 text-white hover:bg-black/80 transition-all cursor-pointer z-10"
+							>
+								<FiX size={18} />
+							</button>
+							<Image
+								src={previewUrl}
+								alt="Shared Preview"
+								className="object-contain w-full h-full max-h-[80vh] rounded-xl"
+								width={1200}
+								height={900}
+							/>
 						</motion.div>
 					</div>
 				)}
