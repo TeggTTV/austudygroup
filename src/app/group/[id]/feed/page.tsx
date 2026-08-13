@@ -76,6 +76,7 @@ export default function GroupFeedPage() {
 	} = useAppContext();
 	const router = useRouter();
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const messagesContainerRef = useRef<HTMLDivElement>(null);
 
 	const [messageText, setMessageText] = useState('');
 	const [fileInput, setFileInput] = useState<File | null>(null);
@@ -187,10 +188,13 @@ export default function GroupFeedPage() {
 
 	// Auto-scroll to bottom only when new messages actually arrive
 	useEffect(() => {
-		if (!isLoading) {
+		if (!isLoading && messagesContainerRef.current) {
 			const currentLength = feedMessages.length;
 			if (currentLength > prevLengthRef.current) {
-				messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+				messagesContainerRef.current.scrollTo({
+					top: messagesContainerRef.current.scrollHeight,
+					behavior: prevLengthRef.current === 0 ? 'auto' : 'smooth',
+				});
 			}
 			prevLengthRef.current = currentLength;
 		}
@@ -327,23 +331,23 @@ export default function GroupFeedPage() {
 				{/* ─── Messages Feed ─── */}
 				<section className="flex-1 bg-surface border border-border rounded-xl flex flex-col h-[75vh]">
 					{/* Group Header */}
-					<div className="border-b border-border px-5 py-3 flex items-center justify-between">
-						<div>
-							<span className="text-[10px] font-bold text-primary bg-primary-light px-2 py-0.5 rounded-full uppercase tracking-wider">
+					<div className="border-b border-border px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+						<div className="min-w-0">
+							<span className="inline-block text-[10px] font-bold text-primary bg-primary-light px-2 py-0.5 rounded-full uppercase tracking-wider">
 								{group.subject}
 							</span>
-							<h1 className="text-base font-bold text-text-primary mt-1">
+							<h1 className="text-base font-bold text-text-primary mt-1 break-words" title={group.name}>
 								{group.name}
 							</h1>
 						</div>
-						<div className="flex items-center gap-3">
+						<div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 border-t border-border/40 sm:border-0 pt-2 sm:pt-0">
 							<span className="text-xs text-text-muted">
 								{group.meetingFrequency}
 							</span>
 							{group.leaderId === currentUser.id && (
 								<button
 									onClick={() => setSettingsOpen(true)}
-									className="p-1.5 rounded-lg text-text-secondary hover:bg-surface-secondary hover:text-text-primary transition-colors cursor-pointer flex items-center justify-center"
+									className="p-1.5 rounded-lg text-text-secondary hover:bg-surface-secondary hover:text-text-primary transition-colors cursor-pointer flex items-center justify-center animate-hover"
 									title="Group Settings"
 								>
 									<FiMoreVertical size={16} />
@@ -353,7 +357,10 @@ export default function GroupFeedPage() {
 					</div>
 
 					{/* Messages */}
-					<div className="grow overflow-y-auto p-4 space-y-3">
+					<div
+						className="grow overflow-y-auto p-4 space-y-3"
+						ref={messagesContainerRef}
+					>
 						{isLoading ? (
 							<div className="flex justify-center items-center py-20">
 								<ClipLoader color="var(--primary)" size={35} />

@@ -7,8 +7,8 @@ export default function Footer() {
 	return (
 		<footer className="border-t border-border bg-surface-secondary py-8 mt-auto">
 			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-				<div className="flex flex-col md:flex-row items-center justify-between gap-4">
-					<div className="flex flex-col items-center md:items-start">
+				<div className="flex flex-col md:flex-row items-center justify-between gap-6">
+					<div className="flex flex-col items-center md:items-start text-center md:text-left">
 						<span className="text-lg font-bold tracking-tight text-primary">
 							AuStudyGroup
 						</span>
@@ -17,27 +17,30 @@ export default function Footer() {
 							quickly.
 						</p>
 					</div>
-					<div className="flex items-center space-x-5 text-xs text-text-muted">
-						<Link
-							href="/"
-							className="hover:text-text-primary transition-colors"
-						>
-							Home
-						</Link>
-						<Link
-							href="/search"
-							className="hover:text-text-primary transition-colors"
-						>
-							Find Groups
-						</Link>
-						<Link
-							href="/groups"
-							className="hover:text-text-primary transition-colors"
-						>
-							My Groups
-						</Link>
-						<span className="text-border">|</span>
-						<span>© 2026 AuStudyGroup. All rights reserved.</span>
+					<div className="flex flex-col items-center md:items-end gap-3 text-xs text-text-muted">
+						<div className="flex flex-wrap justify-center md:justify-end gap-x-5 gap-y-2 font-medium">
+							<Link
+								href="/"
+								className="hover:text-text-primary transition-colors"
+							>
+								Home
+							</Link>
+							<Link
+								href="/search"
+								className="hover:text-text-primary transition-colors"
+							>
+								Find Groups
+							</Link>
+							<Link
+								href="/groups"
+								className="hover:text-text-primary transition-colors"
+							>
+								My Groups
+							</Link>
+						</div>
+						<div className="text-center md:text-right text-[11px] text-text-muted/80">
+							© {new Date().getFullYear()} AuStudyGroup. All rights reserved.
+						</div>
 					</div>
 				</div>
 			</div>
