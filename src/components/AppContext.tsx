@@ -194,11 +194,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			const gData = await gRes.json();
 			if (gData.groups && !gData.offline) {
 				setGroups(gData.groups);
-			} else {
-				const savedGroups = localStorage.getItem('asg_groups');
-				setGroups(
-					savedGroups ? JSON.parse(savedGroups) : MOCK_GROUPS,
-				);
 			}
 
 			// Fetch Requests
