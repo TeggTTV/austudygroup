@@ -227,9 +227,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
 	/* eslint-disable react-hooks/set-state-in-effect */
 	useEffect(() => {
-		setTheme('light');
-		document.documentElement.classList.toggle('dark', false);
-		setCurrentUser(null);
+		const savedTheme = sessionStorage.getItem('asg_theme') as Theme | null;
+		const resolvedTheme = savedTheme || 'light';
+		setTheme(resolvedTheme);
+		document.documentElement.classList.toggle(
+			'dark',
+			resolvedTheme === 'dark',
+		);
+
+		const savedUser = sessionStorage.getItem('asg_current_user');
+		if (savedUser && savedUser !== 'null') {
+			setCurrentUser(JSON.parse(savedUser));
+		} else {
+			setCurrentUser(null);
+		}
 
 		loadData();
 		setHydrated(true);
@@ -249,6 +260,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 	const toggleTheme = useCallback(() => {
 		setTheme((prev) => {
 			const next = prev === 'light' ? 'dark' : 'light';
+			sessionStorage.setItem('asg_theme', next);
 			document.documentElement.classList.toggle('dark', next === 'dark');
 			return next;
 		});
@@ -265,6 +277,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			const data = await res.json();
 			if (data.success && data.user) {
 				setCurrentUser(data.user);
+				sessionStorage.setItem(
+					'asg_current_user',
+					JSON.stringify(data.user),
+				);
 				return { success: true };
 			}
 			return {
@@ -300,6 +316,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 				const data = await res.json();
 				if (data.success && data.user) {
 					setCurrentUser(data.user);
+					sessionStorage.setItem(
+						'asg_current_user',
+						JSON.stringify(data.user),
+					);
 					return { success: true };
 				}
 				return {
@@ -316,6 +336,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
 	const logoutUser = useCallback(() => {
 		setCurrentUser(null);
+		sessionStorage.removeItem('asg_current_user');
 	}, []);
 
 	/* ─── Join Requests ─── */
@@ -487,6 +508,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 			if (!currentUser) return;
 			const updatedUser = { ...currentUser, name, avatarUrl };
 			setCurrentUser(updatedUser);
+			sessionStorage.setItem(
+				'asg_current_user',
+				JSON.stringify(updatedUser),
+			);
 
 			try {
 				await fetch('/api/auth', {

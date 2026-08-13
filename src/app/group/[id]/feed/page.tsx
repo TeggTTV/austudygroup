@@ -183,10 +183,16 @@ export default function GroupFeedPage() {
 		}
 	}, [group, currentUser, router]);
 
-	// Auto-scroll to bottom when new messages arrive
+	const prevLengthRef = useRef(0);
+
+	// Auto-scroll to bottom only when new messages actually arrive
 	useEffect(() => {
 		if (!isLoading) {
-			messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+			const currentLength = feedMessages.length;
+			if (currentLength > prevLengthRef.current) {
+				messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+			}
+			prevLengthRef.current = currentLength;
 		}
 	}, [feedMessages, isLoading]);
 
