@@ -251,7 +251,17 @@ export default function GroupFeedPage() {
 		return () => clearInterval(interval);
 	}, [id, fetchFeedMessages, isIdle]);
 
-	if (!hydrated) return null;
+	if (!hydrated) {
+		return (
+			<div className="flex min-h-screen flex-col bg-background">
+				<Nav />
+				<main className="grow flex items-center justify-center py-20">
+					<ClipLoader color="var(--primary)" size={35} />
+				</main>
+				<Footer />
+			</div>
+		);
+	}
 
 	if (!currentUser || !group) {
 		return (
@@ -329,14 +339,17 @@ export default function GroupFeedPage() {
 
 			<main className="grow mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6">
 				{/* ─── Messages Feed ─── */}
-				<section className="flex-1 bg-surface border border-border rounded-xl flex flex-col h-[75vh]">
+				<section className="flex-1 bg-surface border border-border rounded-xl flex flex-col">
 					{/* Group Header */}
 					<div className="border-b border-border px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
 						<div className="min-w-0">
 							<span className="inline-block text-[10px] font-bold text-primary bg-primary-light px-2 py-0.5 rounded-full uppercase tracking-wider">
 								{group.subject}
 							</span>
-							<h1 className="text-base font-bold text-text-primary mt-1 break-words" title={group.name}>
+							<h1
+								className="text-base font-bold text-text-primary mt-1 wrap-break-word"
+								title={group.name}
+							>
 								{group.name}
 							</h1>
 						</div>
@@ -358,7 +371,7 @@ export default function GroupFeedPage() {
 
 					{/* Messages */}
 					<div
-						className="grow overflow-y-auto p-4 space-y-3"
+						className="grow p-4 space-y-3 h-[60vh] lg:h-[75vh] overflow-y-auto"
 						ref={messagesContainerRef}
 					>
 						{isLoading ? (
