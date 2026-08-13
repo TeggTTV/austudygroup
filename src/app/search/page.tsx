@@ -12,6 +12,34 @@ import { Slider } from '@/components/ui/Slider';
 import { ClipLoader } from 'react-spinners';
 import Image from 'next/image';
 
+const parseGroupFrequency = (freq: string) => {
+	const daysMap: Record<string, boolean> = {
+		Mon: false,
+		Tue: false,
+		Wed: false,
+		Thu: false,
+		Fri: false,
+		Sat: false,
+		Sun: false,
+	};
+	let time = null;
+	let hasCustomDays = false;
+
+	if (freq.startsWith('Weekly on ')) {
+		hasCustomDays = true;
+		const parts = freq.replace('Weekly on ', '').split(' at ');
+		if (parts[0]) {
+			parts[0].split(', ').forEach((day) => {
+				if (daysMap[day] !== undefined) daysMap[day] = true;
+			});
+		}
+		if (parts[1]) {
+			time = parts[1];
+		}
+	}
+	return { hasCustomDays, days: daysMap, time };
+};
+
 function SearchContent() {
 	const { currentUser, groups, requests, sendJoinRequest, users, hydrated } =
 		useAppContext();
@@ -20,7 +48,17 @@ function SearchContent() {
 
 	const [query, setQuery] = useState(searchParams.get('q') || '');
 	const [selectedSubject, setSelectedSubject] = useState('');
-	const [selectedFrequency, setSelectedFrequency] = useState('');
+	const [searchDays, setSearchDays] = useState<Record<string, boolean>>({
+		Mon: false,
+		Tue: false,
+		Wed: false,
+		Thu: false,
+		Fri: false,
+		Sat: false,
+		Sun: false,
+	});
+	const [startTime, setStartTime] = useState('');
+	const [endTime, setEndTime] = useState('');
 	const [minMembers, setMinMembers] = useState(1);
 	const [maxMembers, setMaxMembers] = useState(15);
 	const [selectedGroup, setSelectedGroup] = useState<
@@ -44,25 +82,66 @@ function SearchContent() {
 		setIsLoading(true);
 		const timer = setTimeout(() => setIsLoading(false), 500);
 		return () => clearTimeout(timer);
-	}, [query, selectedSubject, selectedFrequency, minMembers, maxMembers]);
+	}, [
+		query,
+		selectedSubject,
+		searchDays,
+		startTime,
+		endTime,
+		minMembers,
+		maxMembers,
+	]);
 
 	const subjects = Array.from(new Set(groups.map((g) => g.subject)));
-	const frequencies = Array.from(
-		new Set(groups.map((g) => g.meetingFrequency)),
-	);
 
 	const filteredGroups = groups.filter((g) => {
+		const isGroupPrivate = g.isPrivate === true;
+		const isVisible =
+			!isGroupPrivate ||
+			(currentUser &&
+				(g.leaderId === currentUser.id ||
+					g.memberIds.includes(currentUser.id)));
 		const matchQ =
 			g.name.toLowerCase().includes(query.toLowerCase()) ||
 			g.description.toLowerCase().includes(query.toLowerCase()) ||
 			g.subject.toLowerCase().includes(query.toLowerCase());
 		const matchSub = selectedSubject ? g.subject === selectedSubject : true;
-		const matchFreq = selectedFrequency
-			? g.meetingFrequency === selectedFrequency
-			: true;
+
+		// Frequency Matching (Day of Week and Time Range)
+		const {
+			hasCustomDays,
+			days: groupDays,
+			time: groupTime,
+		} = parseGroupFrequency(g.meetingFrequency);
+
+		const activeSearchDays = Object.keys(searchDays).filter(
+			(d) => searchDays[d],
+		);
+		const matchDays =
+			activeSearchDays.length === 0 ||
+			(hasCustomDays && activeSearchDays.some((day) => groupDays[day]));
+
+		let matchTime = true;
+		if (startTime || endTime) {
+			if (groupTime) {
+				if (startTime && groupTime < startTime) matchTime = false;
+				if (endTime && groupTime > endTime) matchTime = false;
+			} else {
+				matchTime = false;
+			}
+		}
+
 		const matchMin = g.minMembers >= minMembers;
 		const matchMax = g.maxMembers <= maxMembers;
-		return matchQ && matchSub && matchFreq && matchMin && matchMax;
+		return (
+			isVisible &&
+			matchQ &&
+			matchSub &&
+			matchDays &&
+			matchTime &&
+			matchMin &&
+			matchMax
+		);
 	});
 
 	const getLeaderName = (id: string) =>
@@ -91,19 +170,31 @@ function SearchContent() {
 
 	const clearFilters = () => {
 		setSelectedSubject('');
-		setSelectedFrequency('');
 		setQuery('');
 		setMinMembers(1);
 		setMaxMembers(15);
+		setSearchDays({
+			Mon: false,
+			Tue: false,
+			Wed: false,
+			Thu: false,
+			Fri: false,
+			Sat: false,
+			Sun: false,
+		});
+		setStartTime('');
+		setEndTime('');
 		router.push('/search');
 	};
 
 	const hasActiveFilters =
 		selectedSubject ||
-		selectedFrequency ||
 		query ||
 		minMembers > 1 ||
-		maxMembers < 15;
+		maxMembers < 15 ||
+		Object.values(searchDays).some(Boolean) ||
+		startTime ||
+		endTime;
 
 	if (!hydrated) return null;
 
@@ -165,28 +256,67 @@ function SearchContent() {
 									</div>
 								</div>
 
-								{/* Frequency */}
-								<div className="space-y-1.5">
+								{/* Meeting Days */}
+								<div className="space-y-2">
 									<label className="block text-[11px] font-semibold text-text-muted uppercase tracking-wider">
-										Frequency
+										Meeting Days
 									</label>
-									<div className="space-y-1.5">
-										{frequencies.map((f) => (
-											<Checkbox
-												key={f}
-												label={f}
-												checked={
-													selectedFrequency === f
+									<div className="flex flex-wrap gap-1">
+										{[
+											'Mon',
+											'Tue',
+											'Wed',
+											'Thu',
+											'Fri',
+											'Sat',
+											'Sun',
+										].map((day) => (
+											<button
+												key={day}
+												type="button"
+												onClick={() =>
+													setSearchDays((prev) => ({
+														...prev,
+														[day]: !prev[day],
+													}))
 												}
-												onChange={() =>
-													setSelectedFrequency(
-														selectedFrequency === f
-															? ''
-															: f,
-													)
-												}
-											/>
+												className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
+													searchDays[day]
+														? 'bg-primary border-primary text-white'
+														: 'border-border bg-surface-secondary text-text-secondary hover:bg-surface-tertiary'
+												}`}
+											>
+												{day}
+											</button>
 										))}
+									</div>
+								</div>
+
+								{/* Time Range */}
+								<div className="space-y-2">
+									<label className="block text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+										Time Range
+									</label>
+									<div className="flex items-center gap-1.5">
+										<input
+											type="time"
+											value={startTime}
+											onChange={(e) =>
+												setStartTime(e.target.value)
+											}
+											className="w-full rounded-lg border border-border bg-surface-secondary px-2 py-1.5 text-xs text-text-primary focus:outline-none"
+										/>
+										<span className="text-xs text-text-muted">
+											to
+										</span>
+										<input
+											type="time"
+											value={endTime}
+											onChange={(e) =>
+												setEndTime(e.target.value)
+											}
+											className="w-full rounded-lg border border-border bg-surface-secondary px-2 py-1.5 text-xs text-text-primary focus:outline-none"
+										/>
 									</div>
 								</div>
 

@@ -187,54 +187,54 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 	const [hydrated, setHydrated] = useState(false);
 
 	/* ─── Hydrate from API / localStorage Fallback ─── */
-	useEffect(() => {
-		async function loadData() {
-			try {
-				// Fetch Groups
-				const gRes = await fetch('/api/groups');
-				const gData = await gRes.json();
-				if (gData.groups && !gData.offline) {
-					setGroups(gData.groups);
-				} else {
-					const savedGroups = localStorage.getItem('asg_groups');
-					setGroups(
-						savedGroups ? JSON.parse(savedGroups) : MOCK_GROUPS,
-					);
-				}
-
-				// Fetch Requests
-				const rRes = await fetch('/api/requests');
-				const rData = await rRes.json();
-				if (rData.requests && !rData.offline) {
-					setRequests(rData.requests);
-				} else {
-					const savedRequests = localStorage.getItem('asg_requests');
-					setRequests(savedRequests ? JSON.parse(savedRequests) : []);
-				}
-
-				// Fetch Users
-				const uRes = await fetch('/api/users');
-				const uData = await uRes.json();
-				if (uData.users && !uData.offline) {
-					setUsers(uData.users);
-				} else {
-					const savedUsers = localStorage.getItem('asg_users');
-					setUsers(savedUsers ? JSON.parse(savedUsers) : []);
-				}
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			} catch (e) {
-				console.warn(
-					'API requests failed. Reverting to LocalStorage cache.',
-				);
+	const loadData = useCallback(async () => {
+		try {
+			// Fetch Groups
+			const gRes = await fetch('/api/groups');
+			const gData = await gRes.json();
+			if (gData.groups && !gData.offline) {
+				setGroups(gData.groups);
+			} else {
 				const savedGroups = localStorage.getItem('asg_groups');
-				setGroups(savedGroups ? JSON.parse(savedGroups) : MOCK_GROUPS);
+				setGroups(
+					savedGroups ? JSON.parse(savedGroups) : MOCK_GROUPS,
+				);
+			}
+
+			// Fetch Requests
+			const rRes = await fetch('/api/requests');
+			const rData = await rRes.json();
+			if (rData.requests && !rData.offline) {
+				setRequests(rData.requests);
+			} else {
 				const savedRequests = localStorage.getItem('asg_requests');
 				setRequests(savedRequests ? JSON.parse(savedRequests) : []);
+			}
+
+			// Fetch Users
+			const uRes = await fetch('/api/users');
+			const uData = await uRes.json();
+			if (uData.users && !uData.offline) {
+				setUsers(uData.users);
+			} else {
 				const savedUsers = localStorage.getItem('asg_users');
 				setUsers(savedUsers ? JSON.parse(savedUsers) : []);
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (e) {
+			console.warn(
+				'API requests failed. Reverting to LocalStorage cache.',
+			);
+			const savedGroups = localStorage.getItem('asg_groups');
+			setGroups(savedGroups ? JSON.parse(savedGroups) : MOCK_GROUPS);
+			const savedRequests = localStorage.getItem('asg_requests');
+			setRequests(savedRequests ? JSON.parse(savedRequests) : []);
+			const savedUsers = localStorage.getItem('asg_users');
+			setUsers(savedUsers ? JSON.parse(savedUsers) : []);
 		}
+	}, []);
 
+	useEffect(() => {
 		const savedTheme = localStorage.getItem('asg_theme') as Theme | null;
 		const resolvedTheme = savedTheme || 'light';
 		// eslint-disable-next-line react-hooks/set-state-in-effect
@@ -253,7 +253,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
 		loadData();
 		setHydrated(true);
-	}, []);
+	}, [loadData]);
+
+	// Reload data whenever currentUser changes
+	/* eslint-disable react-hooks/set-state-in-effect */
+	useEffect(() => {
+		if (hydrated) {
+			loadData();
+		}
+	}, [currentUser, loadData, hydrated]);
+	/* eslint-enable react-hooks/set-state-in-effect */
 
 	/* ─── Theme Toggle ─── */
 	const toggleTheme = useCallback(() => {

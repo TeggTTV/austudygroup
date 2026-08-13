@@ -13,8 +13,8 @@ export default function Footer() {
 							AuStudyGroup
 						</span>
 						<p className="text-xs text-text-muted mt-1">
-							Empowering Australian students to find
-							and join study groups quickly.
+							Empowering students to find and join study groups
+							quickly.
 						</p>
 					</div>
 					<div className="flex items-center space-x-5 text-xs text-text-muted">
@@ -37,10 +37,7 @@ export default function Footer() {
 							My Groups
 						</Link>
 						<span className="text-border">|</span>
-						<span>
-							© 2026 AuStudyGroup. All rights
-							reserved.
-						</span>
+						<span>© 2026 AuStudyGroup. All rights reserved.</span>
 					</div>
 				</div>
 			</div>

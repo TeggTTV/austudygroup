@@ -145,26 +145,24 @@ export default function ProfileMenu() {
 										My Groups
 									</Link>
 
-									{/* Pending Requests (Leader only) */}
-									{currentUser?.role === 'LEADER' && (
-										<Link
-											href="/pending"
-											onClick={() =>
-												setProfileOpen(false)
-											}
-											className="flex items-center justify-between gap-3 px-3 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-tertiary transition-colors"
-										>
-											<span className="flex items-center gap-3">
-												<FiInbox size={15} />
-												Pending
+									{/* Pending Requests */}
+									<Link
+										href="/pending"
+										onClick={() =>
+											setProfileOpen(false)
+										}
+										className="flex items-center justify-between gap-3 px-3 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-tertiary transition-colors"
+									>
+										<span className="flex items-center gap-3">
+											<FiInbox size={15} />
+											Pending Requests
+										</span>
+										{pendingCount > 0 && (
+											<span className="inline-flex items-center justify-center min-w-5 h-5 rounded-full bg-danger text-white text-[10px] font-bold px-1.5">
+												{pendingCount}
 											</span>
-											{pendingCount > 0 && (
-												<span className="inline-flex items-center justify-center min-w-5 h-5 rounded-full bg-danger text-white text-[10px] font-bold px-1.5">
-													{pendingCount}
-												</span>
-											)}
-										</Link>
-									)}
+										)}
+									</Link>
 
 									<div className="h-px bg-border my-1" />
 
