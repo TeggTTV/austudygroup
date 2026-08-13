@@ -130,6 +130,13 @@ export async function PUT(req: Request) {
 					userId: kickUserId,
 				},
 			});
+			// Also delete their join requests so they can submit a new request later
+			await prisma.joinRequest.deleteMany({
+				where: {
+					groupId,
+					userId: kickUserId,
+				},
+			});
 		}
 
 		// 2. Delete shared link / file if requested (FeedMessage)

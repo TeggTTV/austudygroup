@@ -670,6 +670,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 				}),
 			);
 
+			if (settings.kickUserId) {
+				setRequests((prev) =>
+					prev.filter(
+						(r) =>
+							!(
+								r.groupId === groupId &&
+								r.userId === settings.kickUserId
+							),
+					),
+				);
+			}
+
 			if (settings.deleteLinkId || settings.deleteFileId) {
 				const messageId =
 					settings.deleteLinkId || settings.deleteFileId;

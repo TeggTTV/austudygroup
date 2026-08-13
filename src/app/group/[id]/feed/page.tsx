@@ -528,6 +528,7 @@ export default function GroupFeedPage() {
 								rows={1}
 								value={messageText}
 								onChange={(e) => setMessageText(e.target.value)}
+								onSubmit={(e) => setMessageText(e.target.value)}
 								placeholder="Type a message…"
 								className="grow bg-transparent border-0 resize-none text-xs text-text-primary placeholder-text-muted focus:outline-none focus:ring-0 p-2"
 								onKeyDown={(e) => {
